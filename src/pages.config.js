@@ -20,6 +20,7 @@ import AdminPayouts from './pages/AdminPayouts';
 import AdminContent from './pages/AdminContent';
 import AdminAnalytics from './pages/AdminAnalytics';
 import AdminSettings from './pages/AdminSettings';
+import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
@@ -46,6 +47,7 @@ export const PAGES = {
     "AdminContent": AdminContent,
     "AdminAnalytics": AdminAnalytics,
     "AdminSettings": AdminSettings,
+    "Home": Home,
 }
 
 export const pagesConfig = {
