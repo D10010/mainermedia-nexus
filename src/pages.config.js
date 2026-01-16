@@ -12,6 +12,11 @@ import PartnerCommissions from './pages/PartnerCommissions';
 import PartnerPayouts from './pages/PartnerPayouts';
 import PartnerResources from './pages/PartnerResources';
 import PartnerSettings from './pages/PartnerSettings';
+import AdminClients from './pages/AdminClients';
+import AdminProjects from './pages/AdminProjects';
+import AdminPartners from './pages/AdminPartners';
+import AdminLeads from './pages/AdminLeads';
+import AdminPayouts from './pages/AdminPayouts';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +35,11 @@ export const PAGES = {
     "PartnerPayouts": PartnerPayouts,
     "PartnerResources": PartnerResources,
     "PartnerSettings": PartnerSettings,
+    "AdminClients": AdminClients,
+    "AdminProjects": AdminProjects,
+    "AdminPartners": AdminPartners,
+    "AdminLeads": AdminLeads,
+    "AdminPayouts": AdminPayouts,
 }
 
 export const pagesConfig = {
