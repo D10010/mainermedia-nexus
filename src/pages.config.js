@@ -1,53 +1,53 @@
-import ClientDashboard from './pages/ClientDashboard';
-import PartnerDashboard from './pages/PartnerDashboard';
+import AdminAnalytics from './pages/AdminAnalytics';
+import AdminClients from './pages/AdminClients';
+import AdminContent from './pages/AdminContent';
 import AdminDashboard from './pages/AdminDashboard';
-import ClientProjects from './pages/ClientProjects';
+import AdminLeads from './pages/AdminLeads';
+import AdminPartners from './pages/AdminPartners';
+import AdminPayouts from './pages/AdminPayouts';
+import AdminProjects from './pages/AdminProjects';
+import AdminSettings from './pages/AdminSettings';
 import ClientAnalytics from './pages/ClientAnalytics';
-import Messages from './pages/Messages';
-import ClientDocuments from './pages/ClientDocuments';
 import ClientBilling from './pages/ClientBilling';
+import ClientDashboard from './pages/ClientDashboard';
+import ClientDocuments from './pages/ClientDocuments';
+import ClientProjects from './pages/ClientProjects';
 import ClientSettings from './pages/ClientSettings';
-import PartnerLeads from './pages/PartnerLeads';
+import Home from './pages/Home';
+import Messages from './pages/Messages';
 import PartnerCommissions from './pages/PartnerCommissions';
+import PartnerDashboard from './pages/PartnerDashboard';
+import PartnerLeads from './pages/PartnerLeads';
 import PartnerPayouts from './pages/PartnerPayouts';
 import PartnerResources from './pages/PartnerResources';
 import PartnerSettings from './pages/PartnerSettings';
-import AdminClients from './pages/AdminClients';
-import AdminProjects from './pages/AdminProjects';
-import AdminPartners from './pages/AdminPartners';
-import AdminLeads from './pages/AdminLeads';
-import AdminPayouts from './pages/AdminPayouts';
-import AdminContent from './pages/AdminContent';
-import AdminAnalytics from './pages/AdminAnalytics';
-import AdminSettings from './pages/AdminSettings';
-import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "ClientDashboard": ClientDashboard,
-    "PartnerDashboard": PartnerDashboard,
+    "AdminAnalytics": AdminAnalytics,
+    "AdminClients": AdminClients,
+    "AdminContent": AdminContent,
     "AdminDashboard": AdminDashboard,
-    "ClientProjects": ClientProjects,
+    "AdminLeads": AdminLeads,
+    "AdminPartners": AdminPartners,
+    "AdminPayouts": AdminPayouts,
+    "AdminProjects": AdminProjects,
+    "AdminSettings": AdminSettings,
     "ClientAnalytics": ClientAnalytics,
-    "Messages": Messages,
-    "ClientDocuments": ClientDocuments,
     "ClientBilling": ClientBilling,
+    "ClientDashboard": ClientDashboard,
+    "ClientDocuments": ClientDocuments,
+    "ClientProjects": ClientProjects,
     "ClientSettings": ClientSettings,
-    "PartnerLeads": PartnerLeads,
+    "Home": Home,
+    "Messages": Messages,
     "PartnerCommissions": PartnerCommissions,
+    "PartnerDashboard": PartnerDashboard,
+    "PartnerLeads": PartnerLeads,
     "PartnerPayouts": PartnerPayouts,
     "PartnerResources": PartnerResources,
     "PartnerSettings": PartnerSettings,
-    "AdminClients": AdminClients,
-    "AdminProjects": AdminProjects,
-    "AdminPartners": AdminPartners,
-    "AdminLeads": AdminLeads,
-    "AdminPayouts": AdminPayouts,
-    "AdminContent": AdminContent,
-    "AdminAnalytics": AdminAnalytics,
-    "AdminSettings": AdminSettings,
-    "Home": Home,
 }
 
 export const pagesConfig = {

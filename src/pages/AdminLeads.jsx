@@ -45,12 +45,13 @@ export default function AdminLeads() {
     },
   });
 
-  const statuses = ['Submitted', 'Contacted', 'Qualified', 'Proposal Sent', 'Won', 'Lost'];
+  const statuses = ['Submitted', 'Contacted', 'Audit Scheduled', 'Audit Completed', 'Proposal Sent', 'Won', 'Lost'];
   
   const statusColors = {
     Submitted: 'bg-gray-500',
     Contacted: 'bg-blue-500',
-    Qualified: 'bg-amber-500',
+    'Audit Scheduled': 'bg-purple-500',
+    'Audit Completed': 'bg-amber-500',
     'Proposal Sent': 'bg-orange-500',
     Won: 'bg-emerald-500',
     Lost: 'bg-red-500',
@@ -237,16 +238,84 @@ export default function AdminLeads() {
                 options={statuses.map(s => ({ value: s, label: s }))}
               />
               
-              {selectedLead.status === 'Won' && (
-                <div className="mt-4">
+              {selectedLead.status === 'Audit Completed' && (
+                <div className="mt-4 space-y-4">
                   <InputField
-                    label="Commission Amount"
-                    type="number"
-                    value={selectedLead.commission_amount || ''}
-                    onChange={(e) => setSelectedLead({ ...selectedLead, commission_amount: parseFloat(e.target.value) })}
-                    icon={DollarSign}
-                    placeholder="Enter commission amount"
+                    label="Audit Completed Date"
+                    type="date"
+                    value={selectedLead.audit_completed_date || ''}
+                    onChange={(e) => setSelectedLead({ ...selectedLead, audit_completed_date: e.target.value })}
                   />
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedLead({ ...selectedLead, audit_commission_paid: !selectedLead.audit_commission_paid })}
+                      className={`
+                        w-12 h-6 rounded-full transition-colors relative
+                        ${selectedLead.audit_commission_paid ? 'bg-emerald-500' : 'bg-gray-700'}
+                      `}
+                    >
+                      <div className={`
+                        w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform
+                        ${selectedLead.audit_commission_paid ? 'translate-x-6' : 'translate-x-0.5'}
+                      `} />
+                    </button>
+                    <span className="text-sm text-gray-400">$500 Audit commission paid</span>
+                  </div>
+                </div>
+              )}
+              
+              {selectedLead.status === 'Won' && (
+                <div className="mt-4 space-y-4">
+                  <SelectField
+                    label="Service Option"
+                    value={selectedLead.conversion_option || 'None'}
+                    onChange={(e) => setSelectedLead({ ...selectedLead, conversion_option: e.target.value })}
+                    options={[
+                      { value: 'None', label: 'Select Option' },
+                      { value: 'Option 1 - Independent', label: 'Option 1 - Independent Implementation' },
+                      { value: 'Option 2 - Strategic Consulting', label: 'Option 2 - Strategic Consulting ($5k-$10k/mo)' },
+                      { value: 'Option 3 - Full-Service', label: 'Option 3 - Full-Service Execution ($10k-$25k/mo)' },
+                    ]}
+                  />
+                  
+                  {(selectedLead.conversion_option === 'Option 2 - Strategic Consulting' || selectedLead.conversion_option === 'Option 3 - Full-Service') && (
+                    <>
+                      <InputField
+                        label="Conversion Date"
+                        type="date"
+                        value={selectedLead.conversion_date || ''}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, conversion_date: e.target.value })}
+                      />
+                      <InputField
+                        label="Monthly Retainer"
+                        type="number"
+                        value={selectedLead.monthly_retainer || ''}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, monthly_retainer: parseFloat(e.target.value) })}
+                        icon={DollarSign}
+                        placeholder="Enter monthly retainer amount"
+                      />
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedLead({ ...selectedLead, retention_commission_active: !selectedLead.retention_commission_active })}
+                          className={`
+                            w-12 h-6 rounded-full transition-colors relative
+                            ${selectedLead.retention_commission_active ? 'bg-emerald-500' : 'bg-gray-700'}
+                          `}
+                        >
+                          <div className={`
+                            w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform
+                            ${selectedLead.retention_commission_active ? 'translate-x-6' : 'translate-x-0.5'}
+                          `} />
+                        </button>
+                        <div>
+                          <span className="text-sm text-gray-400">5% retention commission active</span>
+                          <p className="text-xs text-gray-600 mt-0.5">Only if converted within 30 days of audit</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -260,7 +329,12 @@ export default function AdminLeads() {
                   id: selectedLead.id, 
                   data: {
                     status: selectedLead.status,
-                    commission_amount: selectedLead.commission_amount,
+                    audit_completed_date: selectedLead.audit_completed_date,
+                    audit_commission_paid: selectedLead.audit_commission_paid,
+                    conversion_option: selectedLead.conversion_option,
+                    conversion_date: selectedLead.conversion_date,
+                    monthly_retainer: selectedLead.monthly_retainer,
+                    retention_commission_active: selectedLead.retention_commission_active,
                   }
                 })}
                 loading={updateLeadMutation.isPending}
