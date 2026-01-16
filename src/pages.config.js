@@ -7,6 +7,11 @@ import Messages from './pages/Messages';
 import ClientDocuments from './pages/ClientDocuments';
 import ClientBilling from './pages/ClientBilling';
 import ClientSettings from './pages/ClientSettings';
+import PartnerLeads from './pages/PartnerLeads';
+import PartnerCommissions from './pages/PartnerCommissions';
+import PartnerPayouts from './pages/PartnerPayouts';
+import PartnerResources from './pages/PartnerResources';
+import PartnerSettings from './pages/PartnerSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -20,6 +25,11 @@ export const PAGES = {
     "ClientDocuments": ClientDocuments,
     "ClientBilling": ClientBilling,
     "ClientSettings": ClientSettings,
+    "PartnerLeads": PartnerLeads,
+    "PartnerCommissions": PartnerCommissions,
+    "PartnerPayouts": PartnerPayouts,
+    "PartnerResources": PartnerResources,
+    "PartnerSettings": PartnerSettings,
 }
 
 export const pagesConfig = {
