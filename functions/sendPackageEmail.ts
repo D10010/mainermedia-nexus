@@ -22,11 +22,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Package not found' }, { status: 404 });
     }
 
-    // Get app settings for custom sender email
-    const appSettings = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: 'This is a helper call to retrieve app metadata.'
-    }).catch(() => ({}));
-    
     const senderEmail = Deno.env.get('SENDER_EMAIL') || 'noreply@base44.com';
     const senderName = Deno.env.get('SENDER_NAME') || 'MainerMedia';
 
