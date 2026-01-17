@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
 <body>
     <div class="container">
         <div class="header">
+            <img src="https://mainermedia.com/logo.png" alt="MainerMedia" style="max-width: 150px; height: auto; margin-bottom: 15px;">
             <h1>Custom Engagement Package</h1>
             <p>Proposal for ${pkg.company_name}</p>
         </div>
