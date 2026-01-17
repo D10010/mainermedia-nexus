@@ -23,6 +23,16 @@ export default function AdminPackages() {
     queryFn: () => base44.entities.Package.list('-created_date'),
   });
 
+  const { data: creatorUser } = useQuery({
+    queryKey: ['user', selectedPackage?.created_by_admin],
+    queryFn: async () => {
+      if (!selectedPackage?.created_by_admin) return null;
+      const users = await base44.entities.User.filter({ email: selectedPackage.created_by_admin });
+      return users[0] || null;
+    },
+    enabled: !!selectedPackage?.created_by_admin,
+  });
+
   const deletePackageMutation = useMutation({
     mutationFn: (id) => base44.entities.Package.delete(id),
     onSuccess: () => {
@@ -166,7 +176,10 @@ export default function AdminPackages() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 uppercase font-mono tracking-wider mb-1">Created By</p>
-                  <p className="text-gray-400 text-sm">{selectedPackage.created_by_admin}</p>
+                  <p className="text-white text-sm">
+                    {creatorUser?.display_name || creatorUser?.full_name || 'Admin'}
+                  </p>
+                  <p className="text-gray-500 text-xs">{selectedPackage.created_by_admin}</p>
                 </div>
               </div>
 
@@ -249,8 +262,11 @@ export default function AdminPackages() {
                 <PrimaryButton
                   variant="secondary"
                   size="small"
-                  onClick={() => updateStatusMutation.mutate({ id: selectedPackage.id, status: 'Sent' })}
-                  disabled={selectedPackage.status === 'Sent'}
+                  onClick={() => {
+                    updateStatusMutation.mutate({ id: selectedPackage.id, status: 'Sent' });
+                  }}
+                  disabled={selectedPackage.status === 'Sent' || updateStatusMutation.isPending}
+                  loading={updateStatusMutation.isPending}
                   icon={Mail}
                 >
                   Mark as Sent
@@ -259,10 +275,12 @@ export default function AdminPackages() {
                   variant="danger"
                   size="small"
                   onClick={() => {
-                    if (confirm('Delete this package?')) {
+                    if (window.confirm('Are you sure you want to delete this package?')) {
                       deletePackageMutation.mutate(selectedPackage.id);
                     }
                   }}
+                  disabled={deletePackageMutation.isPending}
+                  loading={deletePackageMutation.isPending}
                   icon={Trash2}
                 >
                   Delete
