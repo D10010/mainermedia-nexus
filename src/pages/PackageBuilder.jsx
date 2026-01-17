@@ -396,28 +396,45 @@ export default function PackageBuilder() {
 
               {/* Terms */}
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    id="terms"
-                    checked={formData.terms_accepted}
-                    onChange={(e) => updateField('terms_accepted', e.target.checked)}
-                    className="mt-1"
-                  />
-                  <label htmlFor="terms" className="text-sm text-gray-400">
-                    <span className="text-white font-medium">I acknowledge the following terms:</span>
-                    <ul className="mt-2 space-y-1 text-xs">
-                      <li>• <strong>Decision Window:</strong> 30 days from audit completion to select engagement pathway</li>
-                      {formData.selected_option !== 'Option 1 - Independent' && (
-                        <>
-                          <li>• <strong>Probationary Period:</strong> {formData.probation_months}-6 months minimum commitment for proper implementation</li>
-                          <li>• <strong>Audit Credit:</strong> $5,000 audit fee credited evenly across engagement term</li>
-                          <li>• <strong>Renegotiation:</strong> After probation, review metrics and optionally renegotiate terms</li>
-                        </>
-                      )}
-                      <li>• <strong>Fair Market Pricing:</strong> Final retainer subject to detailed discovery and company specifics</li>
-                    </ul>
-                  </label>
+                <div className="border-2 border-amber-500/30 bg-amber-500/5 rounded-sm p-4">
+                  <div className="flex items-start gap-4">
+                    <input
+                      type="checkbox"
+                      id="terms"
+                      checked={formData.terms_accepted}
+                      onChange={(e) => updateField('terms_accepted', e.target.checked)}
+                      className="w-5 h-5 mt-0.5 cursor-pointer accent-emerald-500"
+                    />
+                    <label htmlFor="terms" className="text-sm text-gray-300 cursor-pointer flex-1">
+                      <span className="text-white font-semibold text-base">I acknowledge the following terms:</span>
+                      <ul className="mt-3 space-y-2 text-sm">
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-500 font-bold">•</span>
+                          <span><strong className="text-white">Decision Window:</strong> 30 days from audit completion to select engagement pathway</span>
+                        </li>
+                        {formData.selected_option !== 'Option 1 - Independent' && (
+                          <>
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-500 font-bold">•</span>
+                              <span><strong className="text-white">Probationary Period:</strong> {formData.probation_months}-6 months minimum commitment for proper implementation</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-500 font-bold">•</span>
+                              <span><strong className="text-white">Audit Credit:</strong> $5,000 audit fee credited evenly across engagement term</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-500 font-bold">•</span>
+                              <span><strong className="text-white">Renegotiation:</strong> After probation, review metrics and optionally renegotiate terms</span>
+                            </li>
+                          </>
+                        )}
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-500 font-bold">•</span>
+                          <span><strong className="text-white">Fair Market Pricing:</strong> Final retainer subject to detailed discovery and company specifics</span>
+                        </li>
+                      </ul>
+                    </label>
+                  </div>
                 </div>
               </div>
 
