@@ -93,7 +93,13 @@ export default function AdminPackages() {
   });
 
   const updatePackageMutation = useMutation({
-    mutationFn: (data) => base44.entities.Package.update(selectedPackage.id, data),
+    mutationFn: (data) => base44.entities.Package.update(selectedPackage.id, {
+      company_name: data.company_name,
+      contact_email: data.contact_email,
+      contact_phone: data.contact_phone,
+      probation_months: data.probation_months,
+      notes: data.notes
+    }),
     onSuccess: (updatedPackage) => {
       queryClient.invalidateQueries(['packages']);
       setSelectedPackage(updatedPackage);
