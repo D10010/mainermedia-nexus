@@ -101,20 +101,20 @@ Deno.serve(async (req) => {
     doc.line(margin + 5, y, margin + 25, y);
     
     y += 5;
-    const detailsHeight = pkg.calculated_retainer > 0 ? (pkg.decision_deadline ? 65 : 55) : 35;
+    const detailsHeight = pkg.calculated_retainer > 0 ? (pkg.decision_deadline ? 60 : 50) : 30;
     doc.setFillColor(18, 22, 29);
     doc.setDrawColor(255, 255, 255, 0.08 * 255);
     doc.rect(margin, y, pageWidth - margin * 2, detailsHeight, 'FD');
 
-    y += 8;
-    doc.setFontSize(10);
+    y += 7;
+    doc.setFontSize(9);
     doc.setTextColor(156, 163, 175);
     doc.setFont(undefined, 'normal');
     doc.text('Selected Option:', margin + 5, y);
     doc.setTextColor(255, 255, 255);
     doc.text(pkg.selected_option, margin + 50, y);
 
-    y += 8;
+    y += 7;
     doc.setTextColor(156, 163, 175);
     doc.text('Audit Fee:', margin + 5, y);
     doc.setTextColor(16, 185, 129);
@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
     doc.text('$5,000', margin + 50, y);
 
     if (pkg.calculated_retainer > 0) {
-      y += 8;
+      y += 7;
       doc.setTextColor(156, 163, 175);
       doc.setFont(undefined, 'normal');
       doc.text('Monthly Retainer:', margin + 5, y);
@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
       doc.setFont(undefined, 'bold');
       doc.text(`$${pkg.calculated_retainer.toLocaleString()}/month`, margin + 50, y);
 
-      y += 8;
+      y += 7;
       doc.setTextColor(156, 163, 175);
       doc.setFont(undefined, 'normal');
       doc.text('Probation Period:', margin + 5, y);
@@ -139,14 +139,14 @@ Deno.serve(async (req) => {
     }
 
     if (pkg.decision_deadline) {
-      y += 8;
+      y += 7;
       doc.setTextColor(156, 163, 175);
       doc.text('Decision Deadline:', margin + 5, y);
       doc.setTextColor(255, 255, 255);
       doc.text(new Date(pkg.decision_deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), margin + 50, y);
     }
 
-    y += detailsHeight - (pkg.calculated_retainer > 0 ? (pkg.decision_deadline ? 32 : 24) : 16) + 8;
+    y += detailsHeight - (pkg.calculated_retainer > 0 ? (pkg.decision_deadline ? 28 : 21) : 14) + 6;
 
     // Company Profile Section
     if (pkg.company_scale || pkg.annual_revenue || pkg.gross_profit_margin || pkg.growth_target) {
@@ -164,7 +164,7 @@ Deno.serve(async (req) => {
       
       y += 5;
       const profileItems = [pkg.company_scale, pkg.annual_revenue, pkg.gross_profit_margin, pkg.growth_target].filter(Boolean).length;
-      const profileHeight = 8 + (profileItems * 7);
+      const profileHeight = 8 + (profileItems * 6);
       
       doc.setFillColor(18, 22, 29);
       doc.setDrawColor(255, 255, 255, 0.08 * 255);
@@ -178,7 +178,7 @@ Deno.serve(async (req) => {
         doc.text('Company Scale:', margin + 5, y);
         doc.setTextColor(255, 255, 255);
         doc.text(pkg.company_scale, margin + 45, y);
-        y += 7;
+        y += 6;
       }
 
       if (pkg.annual_revenue) {
@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
         doc.text('Annual Revenue:', margin + 5, y);
         doc.setTextColor(255, 255, 255);
         doc.text(`$${pkg.annual_revenue.toLocaleString()}`, margin + 45, y);
-        y += 7;
+        y += 6;
       }
 
       if (pkg.gross_profit_margin) {
@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
         doc.text('Profit Margin:', margin + 5, y);
         doc.setTextColor(255, 255, 255);
         doc.text(`${pkg.gross_profit_margin}%`, margin + 45, y);
-        y += 7;
+        y += 6;
       }
 
       if (pkg.growth_target) {
@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
         doc.text('Growth Target:', margin + 5, y);
         doc.setTextColor(255, 255, 255);
         doc.text(pkg.growth_target, margin + 45, y);
-        y += 7;
+        y += 6;
       }
 
       y += 5;
@@ -223,31 +223,40 @@ Deno.serve(async (req) => {
       doc.line(margin + 5, y, margin + 25, y);
       
       y += 5;
+      const termsBoxHeight = 55;
       doc.setFillColor(16, 185, 129, 0.1 * 255);
       doc.setDrawColor(16, 185, 129, 0.3 * 255);
-      doc.rect(margin, y, pageWidth - margin * 2, 45, 'FD');
+      doc.rect(margin, y, pageWidth - margin * 2, termsBoxHeight, 'FD');
       
       doc.setDrawColor(16, 185, 129);
       doc.setLineWidth(2);
-      doc.line(margin, y, margin, y + 45);
+      doc.line(margin, y, margin, y + termsBoxHeight);
 
       y += 10;
       doc.setFontSize(9);
       doc.setTextColor(16, 185, 129);
       doc.setFont(undefined, 'bold');
-      doc.text('KEY TERMS', margin + 5, y);
+      doc.text('ENGAGEMENT TERMS', margin + 5, y);
 
       y += 8;
       doc.setFontSize(8);
       doc.setTextColor(156, 163, 175);
       doc.setFont(undefined, 'normal');
-      doc.text('• Decision Window: 30 days from audit completion', margin + 5, y);
-      y += 6;
-      doc.text(`• Probationary Period: ${pkg.probation_months}-6 months minimum commitment`, margin + 5, y);
-      y += 6;
-      doc.text('• Audit Credit: $5,000 audit fee credited evenly across engagement term', margin + 5, y);
-      y += 6;
-      doc.text('• Renegotiation: After probation, review metrics and optionally renegotiate terms', margin + 5, y);
+      
+      // Use simple dash instead of bullet to avoid encoding issues
+      const terms = [
+        'Decision Window: 30 days from audit completion',
+        `Probationary Period: ${pkg.probation_months}-6 months minimum commitment`,
+        'Audit Credit: $5,000 audit fee credited evenly across engagement',
+        'Renegotiation: After probation, review and renegotiate terms'
+      ];
+      
+      terms.forEach((term, index) => {
+        const lines = doc.splitTextToSize(term, pageWidth - margin * 2 - 15);
+        doc.text('-', margin + 5, y);
+        doc.text(lines, margin + 10, y);
+        y += lines.length * 5 + 1;
+      });
 
       y += 15;
     }
@@ -275,10 +284,10 @@ Deno.serve(async (req) => {
       doc.rect(margin, y, pageWidth - margin * 2, notesHeight, 'FD');
 
       y += 8;
-      doc.setFontSize(9);
+      doc.setFontSize(8);
       doc.setTextColor(156, 163, 175);
       doc.text(splitNotes, margin + 5, y);
-      y += notesHeight;
+      y += notesHeight + 5;
     }
 
     // Footer
