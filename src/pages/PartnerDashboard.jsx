@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import RoleGuard from '../components/RoleGuard';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -101,6 +102,7 @@ export default function PartnerDashboard() {
   };
 
   return (
+    <RoleGuard allowedRoles={['partner']}>
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -298,5 +300,6 @@ export default function PartnerDashboard() {
         </div>
       </Panel>
     </div>
+    </RoleGuard>
   );
 }

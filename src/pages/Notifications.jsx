@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import RoleGuard from '../components/RoleGuard';
 import { Bell, Check, X, Archive, Trash2, RefreshCw, ExternalLink, UserPlus } from 'lucide-react';
 import Panel from '../components/ui/Panel';
 import PrimaryButton from '../components/ui/PrimaryButton';
@@ -138,6 +139,7 @@ export default function Notifications() {
   };
 
   return (
+    <RoleGuard allowedRoles={['admin', 'client', 'partner']}>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -337,5 +339,6 @@ export default function Notifications() {
         )}
       </Modal>
     </div>
+    </RoleGuard>
   );
 }

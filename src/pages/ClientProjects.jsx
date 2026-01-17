@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import RoleGuard from '../components/RoleGuard';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -68,6 +69,7 @@ export default function ClientProjects() {
   const statuses = ['all', 'Planning', 'In Progress', 'On Hold', 'Completed', 'Cancelled'];
 
   return (
+    <RoleGuard allowedRoles={['client']}>
     <div className="space-y-6">
       {/* Header */}
       <div>
@@ -318,5 +320,6 @@ export default function ClientProjects() {
         </div>
       </div>
     </div>
+    </RoleGuard>
   );
 }
