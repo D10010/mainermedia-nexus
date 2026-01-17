@@ -224,21 +224,7 @@ export default function Notifications() {
                   </div>
 
                   {/* Content */}
-                  <div 
-                    className={`flex-1 min-w-0 ${notification.link ? 'cursor-pointer' : ''}`}
-                    onClick={() => {
-                      if (notification.link) {
-                        const url = notification.metadata?.packageId 
-                          ? createPageUrl(notification.link) + `?packageId=${notification.metadata.packageId}`
-                          : createPageUrl(notification.link);
-                        navigate(url);
-                        updateMutation.mutate({
-                          id: notification.id,
-                          data: { read: true }
-                        });
-                      }
-                    }}
-                  >
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <h3 className={`text-sm font-medium ${notification.read ? 'text-gray-400' : 'text-white'}`}>
                         {notification.title}
