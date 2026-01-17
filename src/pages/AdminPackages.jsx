@@ -410,18 +410,18 @@ export default function AdminPackages() {
                   {isGenerating ? 'Generating...' : 'Download Quote'}
                 </PrimaryButton>
                 <PrimaryButton
-                  variant="secondary"
+                  variant={selectedPackage.status === 'Sent' ? 'secondary' : 'primary'}
                   size="small"
                   onClick={async () => {
-                    if (window.confirm(`Send this package to ${selectedPackage.contact_email}?`)) {
+                    if (window.confirm(`${selectedPackage.status === 'Sent' ? 'Resend' : 'Send'} this package to ${selectedPackage.contact_email}?`)) {
                       await sendPackageEmailMutation.mutateAsync(selectedPackage.id);
                     }
                   }}
-                  disabled={selectedPackage.status === 'Sent' || sendPackageEmailMutation.isPending}
+                  disabled={sendPackageEmailMutation.isPending}
                   loading={sendPackageEmailMutation.isPending}
                   icon={Mail}
                 >
-                  {selectedPackage.status === 'Sent' ? 'Already Sent' : 'Send Email'}
+                  {sendPackageEmailMutation.isPending ? 'Sending...' : selectedPackage.status === 'Sent' ? 'Resend Email' : 'Send Email'}
                 </PrimaryButton>
                 <PrimaryButton
                   variant="danger"
