@@ -225,10 +225,13 @@ export default function Notifications() {
 
                   {/* Content */}
                   <div 
-                    className="flex-1 min-w-0 cursor-pointer"
+                    className={`flex-1 min-w-0 ${notification.link ? 'cursor-pointer' : ''}`}
                     onClick={() => {
-                      if (notification.link && notification.metadata?.packageId) {
-                        navigate(createPageUrl(notification.link) + `?packageId=${notification.metadata.packageId}`);
+                      if (notification.link) {
+                        const url = notification.metadata?.packageId 
+                          ? createPageUrl(notification.link) + `?packageId=${notification.metadata.packageId}`
+                          : createPageUrl(notification.link);
+                        navigate(url);
                         updateMutation.mutate({
                           id: notification.id,
                           data: { read: true }
