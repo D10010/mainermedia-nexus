@@ -206,6 +206,13 @@ export default function AdminPackages() {
 
   const columns = [
     {
+      key: 'id',
+      label: 'ID',
+      render: (pkg) => (
+        <span className="text-xs text-gray-500 font-mono">{pkg.id.substring(0, 8)}...</span>
+      ),
+    },
+    {
       key: 'company_name',
       label: 'Company',
       sortable: true,
