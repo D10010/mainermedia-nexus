@@ -420,6 +420,14 @@ export default function AdminPackages() {
                   {isGenerating ? 'Generating...' : 'Download Quote'}
                 </PrimaryButton>
                 <PrimaryButton
+                  variant="secondary"
+                  size="small"
+                  onClick={() => setShowEditModal(true)}
+                  icon={Edit}
+                >
+                  Edit
+                </PrimaryButton>
+                <PrimaryButton
                   variant={selectedPackage.status === 'Sent' ? 'secondary' : 'primary'}
                   size="small"
                   onClick={async () => {
