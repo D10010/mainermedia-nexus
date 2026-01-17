@@ -143,6 +143,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Dashboard', icon: LayoutDashboard, page: 'AdminDashboard' },
     { name: 'Clients', icon: Users, page: 'AdminClients' },
     { name: 'Projects', icon: Folder, page: 'AdminProjects' },
+    { name: 'Packages', icon: Folder, page: 'AdminPackages' },
     { name: 'Partners', icon: Users, page: 'AdminPartners' },
     { name: 'Leads', icon: Target, page: 'AdminLeads' },
     { name: 'Commissions', icon: DollarSign, page: 'AdminCommissions' },
