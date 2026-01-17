@@ -1,5 +1,6 @@
 import AdminAnalytics from './pages/AdminAnalytics';
 import AdminClients from './pages/AdminClients';
+import AdminCommissions from './pages/AdminCommissions';
 import AdminContent from './pages/AdminContent';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLeads from './pages/AdminLeads';
@@ -21,13 +22,13 @@ import PartnerLeads from './pages/PartnerLeads';
 import PartnerPayouts from './pages/PartnerPayouts';
 import PartnerResources from './pages/PartnerResources';
 import PartnerSettings from './pages/PartnerSettings';
-import AdminCommissions from './pages/AdminCommissions';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AdminAnalytics": AdminAnalytics,
     "AdminClients": AdminClients,
+    "AdminCommissions": AdminCommissions,
     "AdminContent": AdminContent,
     "AdminDashboard": AdminDashboard,
     "AdminLeads": AdminLeads,
@@ -49,7 +50,6 @@ export const PAGES = {
     "PartnerPayouts": PartnerPayouts,
     "PartnerResources": PartnerResources,
     "PartnerSettings": PartnerSettings,
-    "AdminCommissions": AdminCommissions,
 }
 
 export const pagesConfig = {

@@ -8,7 +8,8 @@ import {
   CreditCard,
   Upload,
   Save,
-  CheckCircle2
+  CheckCircle2,
+  X
 } from 'lucide-react';
 import Panel from '@/components/ui/Panel';
 import InputField from '@/components/ui/InputField';
@@ -40,7 +41,10 @@ export default function PartnerSettings() {
     company_name: '',
     payment_method: 'PayPal',
     payment_details: '',
+    avatar_url: '',
   });
+
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     if (user || partner) {
@@ -49,14 +53,45 @@ export default function PartnerSettings() {
         company_name: partner?.company_name || '',
         payment_method: partner?.payment_method || 'PayPal',
         payment_details: partner?.payment_details || '',
+        avatar_url: user?.avatar_url || '',
       });
     }
   }, [user, partner]);
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData({ ...formData, avatar_url: file_url });
+      
+      await base44.auth.updateMe({ avatar_url: file_url });
+      queryClient.invalidateQueries(['currentUser']);
+      
+      setSuccessMessage('Avatar updated successfully');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const removeAvatar = async () => {
+    setFormData({ ...formData, avatar_url: '' });
+    await base44.auth.updateMe({ avatar_url: '' });
+    queryClient.invalidateQueries(['currentUser']);
+    setSuccessMessage('Avatar removed');
+    setTimeout(() => setSuccessMessage(''), 3000);
+  };
 
   const updateProfileMutation = useMutation({
     mutationFn: async () => {
       await base44.auth.updateMe({
         full_name: formData.full_name,
+        avatar_url: formData.avatar_url,
       });
       
       if (partner?.id) {
@@ -178,14 +213,45 @@ export default function PartnerSettings() {
               <div className="space-y-6">
                 {/* Avatar */}
                 <div className="flex items-center gap-6">
-                  <div className="w-20 h-20 rounded-sm bg-emerald-500/20 flex items-center justify-center">
-                    <span className="text-emerald-500 text-2xl font-medium">
-                      {formData.full_name?.[0]?.toUpperCase() || 'P'}
-                    </span>
+                  <div className="relative">
+                    {formData.avatar_url ? (
+                      <div className="relative w-20 h-20 rounded-sm overflow-hidden">
+                        <img 
+                          src={formData.avatar_url} 
+                          alt="Avatar" 
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          onClick={removeAvatar}
+                          className="absolute top-1 right-1 p-1 bg-red-500/80 hover:bg-red-500 rounded-sm transition-colors"
+                        >
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded-sm bg-emerald-500/20 flex items-center justify-center">
+                        <span className="text-emerald-500 text-2xl font-medium">
+                          {formData.full_name?.[0]?.toUpperCase() || 'P'}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-white font-medium">{formData.full_name || 'Partner'}</p>
-                    <p className="text-gray-500 text-sm">{user?.email}</p>
+                    <p className="text-gray-500 text-sm mb-3">{user?.email}</p>
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                        className="hidden"
+                        disabled={uploadingAvatar}
+                      />
+                      <span className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-[#0E1116] border border-white/[0.08] rounded-sm text-gray-300 hover:text-white hover:border-emerald-500/50 transition-colors">
+                        <Upload className="w-3 h-3" />
+                        {uploadingAvatar ? 'Uploading...' : 'Change Avatar'}
+                      </span>
+                    </label>
                   </div>
                 </div>
 

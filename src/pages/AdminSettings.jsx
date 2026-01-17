@@ -10,7 +10,10 @@ import {
   Shield,
   Save,
   Plus,
-  CheckCircle2
+  CheckCircle2,
+  Upload,
+  X,
+  User as UserIcon
 } from 'lucide-react';
 import Panel from '@/components/ui/Panel';
 import InputField from '@/components/ui/InputField';
@@ -18,11 +21,74 @@ import PrimaryButton from '@/components/ui/PrimaryButton';
 import Modal from '@/components/ui/Modal';
 
 export default function AdminSettings() {
-  const [activeTab, setActiveTab] = useState('team');
+  const [activeTab, setActiveTab] = useState('profile');
   const [successMessage, setSuccessMessage] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const queryClient = useQueryClient();
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const [profileData, setProfileData] = useState({
+    full_name: '',
+    avatar_url: '',
+  });
+
+  React.useEffect(() => {
+    if (currentUser) {
+      setProfileData({
+        full_name: currentUser.full_name || '',
+        avatar_url: currentUser.avatar_url || '',
+      });
+    }
+  }, [currentUser]);
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setProfileData({ ...profileData, avatar_url: file_url });
+      
+      await base44.auth.updateMe({ avatar_url: file_url });
+      queryClient.invalidateQueries(['currentUser']);
+      
+      setSuccessMessage('Avatar updated successfully');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const removeAvatar = async () => {
+    setProfileData({ ...profileData, avatar_url: '' });
+    await base44.auth.updateMe({ avatar_url: '' });
+    queryClient.invalidateQueries(['currentUser']);
+    setSuccessMessage('Avatar removed');
+    setTimeout(() => setSuccessMessage(''), 3000);
+  };
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async () => {
+      await base44.auth.updateMe({
+        full_name: profileData.full_name,
+        avatar_url: profileData.avatar_url,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['currentUser']);
+      setSuccessMessage('Profile updated successfully');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    },
+  });
 
   const { data: users = [] } = useQuery({
     queryKey: ['allUsers'],
@@ -50,6 +116,7 @@ export default function AdminSettings() {
   const adminUsers = users.filter(u => u.role === 'admin');
 
   const tabs = [
+    { id: 'profile', label: 'Profile', icon: UserIcon },
     { id: 'team', label: 'Team', icon: Users },
     { id: 'commissions', label: 'Commissions', icon: DollarSign },
     { id: 'email', label: 'Email', icon: Mail },
@@ -99,6 +166,74 @@ export default function AdminSettings() {
 
         {/* Content */}
         <div className="lg:col-span-3">
+          {activeTab === 'profile' && (
+            <Panel title="Profile Information">
+              <div className="space-y-6">
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    {profileData.avatar_url ? (
+                      <div className="relative w-20 h-20 rounded-sm overflow-hidden">
+                        <img 
+                          src={profileData.avatar_url} 
+                          alt="Avatar" 
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          onClick={removeAvatar}
+                          className="absolute top-1 right-1 p-1 bg-red-500/80 hover:bg-red-500 rounded-sm transition-colors"
+                        >
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded-sm bg-emerald-500/20 flex items-center justify-center">
+                        <span className="text-emerald-500 text-2xl font-medium">
+                          {profileData.full_name?.[0]?.toUpperCase() || 'A'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white font-medium">{profileData.full_name || 'Admin'}</p>
+                    <p className="text-gray-500 text-sm mb-3">{currentUser?.email}</p>
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                        className="hidden"
+                        disabled={uploadingAvatar}
+                      />
+                      <span className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-[#0E1116] border border-white/[0.08] rounded-sm text-gray-300 hover:text-white hover:border-emerald-500/50 transition-colors">
+                        <Upload className="w-3 h-3" />
+                        {uploadingAvatar ? 'Uploading...' : 'Change Avatar'}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-white/[0.08]">
+                  <InputField
+                    label="Display Name"
+                    value={profileData.full_name}
+                    onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                    icon={UserIcon}
+                  />
+                </div>
+
+                <div className="flex justify-end pt-6 border-t border-white/[0.08]">
+                  <PrimaryButton
+                    onClick={() => updateProfileMutation.mutate()}
+                    loading={updateProfileMutation.isPending}
+                    icon={Save}
+                  >
+                    Save Changes
+                  </PrimaryButton>
+                </div>
+              </div>
+            </Panel>
+          )}
+
           {activeTab === 'team' && (
             <Panel title="Team Members">
               <div className="space-y-6">

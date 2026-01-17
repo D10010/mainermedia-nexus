@@ -167,11 +167,19 @@ export default function Layout({ children, currentPageName }) {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-3 p-2 rounded-sm hover:bg-white/[0.05] transition-colors"
               >
-                <div className="w-8 h-8 rounded-sm bg-emerald-500/20 flex items-center justify-center">
-                  <span className="text-emerald-500 text-sm font-medium">
-                    {user?.full_name?.[0]?.toUpperCase() || 'U'}
-                  </span>
-                </div>
+                {user?.avatar_url ? (
+                  <img 
+                    src={user.avatar_url} 
+                    alt="Avatar" 
+                    className="w-8 h-8 rounded-sm object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-sm bg-emerald-500/20 flex items-center justify-center">
+                    <span className="text-emerald-500 text-sm font-medium">
+                      {user?.full_name?.[0]?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                )}
                 <div className="hidden md:block text-left">
                   <p className="text-sm text-white">{user?.full_name || 'User'}</p>
                   <p className="text-[10px] font-mono text-gray-500 uppercase">
