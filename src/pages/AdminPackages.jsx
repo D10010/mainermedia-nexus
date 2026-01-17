@@ -16,16 +16,33 @@ import { Plus, Package, Eye, Trash2, Mail, Download } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AdminPackages() {
-  const queryClient = useQueryClient();
-  const [selectedPackage, setSelectedPackage] = useState(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const quoteRef = useRef(null);
+    const queryClient = useQueryClient();
+    const [selectedPackage, setSelectedPackage] = useState(null);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const quoteRef = useRef(null);
+
+    // Get packageId from URL params to auto-open package
+    const urlParams = new URLSearchParams(window.location.search);
+    const packageIdFromUrl = urlParams.get('packageId');
 
   const { data: packages = [], isLoading } = useQuery({
     queryKey: ['packages'],
     queryFn: () => base44.entities.Package.list('-created_date'),
   });
+
+  // Auto-open package if packageId is in URL
+  React.useEffect(() => {
+    if (packageIdFromUrl && packages.length > 0) {
+      const pkg = packages.find(p => p.id === packageIdFromUrl);
+      if (pkg) {
+        setSelectedPackage(pkg);
+        setShowDetailsModal(true);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [packageIdFromUrl, packages]);
 
   const { data: creatorUser } = useQuery({
     queryKey: ['user', selectedPackage?.created_by_admin],
