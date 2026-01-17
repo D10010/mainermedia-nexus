@@ -12,7 +12,7 @@ import DataTable from '../components/ui/DataTable';
 import Modal from '../components/ui/Modal';
 import QuoteTemplate from '../components/QuoteTemplate';
 import html2canvas from 'html2canvas';
-import { Plus, Package, Eye, Trash2, Mail, Download } from 'lucide-react';
+import { Plus, Package, Eye, Trash2, Mail, Download, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AdminPackages() {
