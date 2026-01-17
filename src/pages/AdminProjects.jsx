@@ -10,7 +10,10 @@ import {
   Users,
   Edit2,
   CheckCircle2,
-  Circle
+  Circle,
+  Trash2,
+  Upload,
+  FileText
 } from 'lucide-react';
 import Panel from '@/components/ui/Panel';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -28,6 +31,9 @@ export default function AdminProjects() {
   const [showAddProject, setShowAddProject] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showMilestoneModal, setShowMilestoneModal] = useState(false);
+  const [showDeliverableModal, setShowDeliverableModal] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const queryClient = useQueryClient();
 
   const [newProject, setNewProject] = useState({
@@ -57,6 +63,25 @@ export default function AdminProjects() {
     enabled: !!selectedProject?.id,
   });
 
+  const { data: deliverables = [] } = useQuery({
+    queryKey: ['projectDeliverables', selectedProject?.id],
+    queryFn: () => base44.entities.Deliverable.filter({ project_id: selectedProject.id }),
+    enabled: !!selectedProject?.id,
+  });
+
+  const [newMilestone, setNewMilestone] = useState({
+    title: '',
+    description: '',
+    due_date: '',
+    status: 'Pending',
+  });
+
+  const [newDeliverable, setNewDeliverable] = useState({
+    name: '',
+    file_url: '',
+    file_type: 'Document',
+  });
+
   const createProjectMutation = useMutation({
     mutationFn: (data) => base44.entities.Project.create({
       ...data,
@@ -79,6 +104,72 @@ export default function AdminProjects() {
       setSelectedProject(null);
     },
   });
+
+  const createMilestoneMutation = useMutation({
+    mutationFn: (data) => base44.entities.Milestone.create({
+      ...data,
+      project_id: selectedProject.id,
+      order: milestones.length,
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['projectMilestones']);
+      setShowMilestoneModal(false);
+      setNewMilestone({ title: '', description: '', due_date: '', status: 'Pending' });
+    },
+  });
+
+  const updateMilestoneMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Milestone.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['projectMilestones']);
+    },
+  });
+
+  const deleteMilestoneMutation = useMutation({
+    mutationFn: (id) => base44.entities.Milestone.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['projectMilestones']);
+    },
+  });
+
+  const createDeliverableMutation = useMutation({
+    mutationFn: (data) => base44.entities.Deliverable.create({
+      ...data,
+      project_id: selectedProject.id,
+      uploaded_by: 'Admin',
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['projectDeliverables']);
+      setShowDeliverableModal(false);
+      setNewDeliverable({ name: '', file_url: '', file_type: 'Document' });
+    },
+  });
+
+  const deleteDeliverableMutation = useMutation({
+    mutationFn: (id) => base44.entities.Deliverable.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['projectDeliverables']);
+    },
+  });
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setNewDeliverable({
+        ...newDeliverable,
+        file_url,
+        name: newDeliverable.name || file.name,
+      });
+    } catch (error) {
+      console.error('Failed to upload file:', error);
+    } finally {
+      setUploadingFile(false);
+    }
+  };
 
   const statuses = ['all', 'Planning', 'In Progress', 'On Hold', 'Completed', 'Cancelled'];
 
@@ -337,23 +428,92 @@ export default function AdminProjects() {
 
             {/* Milestones */}
             <div className="pt-4 border-t border-white/[0.08]">
-              <h4 className="text-[11px] font-mono text-gray-500 uppercase tracking-wider mb-3">Milestones</h4>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-[11px] font-mono text-gray-500 uppercase tracking-wider">Milestones</h4>
+                <PrimaryButton size="small" onClick={() => setShowMilestoneModal(true)}>
+                  <Plus className="w-3 h-3" />
+                  Add Milestone
+                </PrimaryButton>
+              </div>
               <div className="space-y-2">
                 {milestones.map((milestone) => (
-                  <div key={milestone.id} className="flex items-center gap-3 p-3 bg-[#0E1116] rounded-sm">
-                    {milestone.status === 'Completed' ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    ) : (
-                      <Circle className="w-4 h-4 text-gray-600" />
-                    )}
+                  <div key={milestone.id} className="flex items-center gap-3 p-3 bg-[#0E1116] rounded-sm group">
+                    <button
+                      onClick={() => {
+                        const newStatus = milestone.status === 'Completed' ? 'Pending' : 'Completed';
+                        updateMilestoneMutation.mutate({ id: milestone.id, data: { status: newStatus } });
+                      }}
+                    >
+                      {milestone.status === 'Completed' ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      ) : (
+                        <Circle className="w-4 h-4 text-gray-600 hover:text-emerald-500" />
+                      )}
+                    </button>
                     <div className="flex-1">
                       <p className="text-sm text-white">{milestone.title}</p>
+                      {milestone.description && (
+                        <p className="text-xs text-gray-500 mt-0.5">{milestone.description}</p>
+                      )}
                     </div>
                     <StatusBadge status={milestone.status} size="small" showDot={false} />
+                    <button
+                      onClick={() => {
+                        if (confirm('Delete this milestone?')) {
+                          deleteMilestoneMutation.mutate(milestone.id);
+                        }
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-300 transition-opacity"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
                   </div>
                 ))}
                 {milestones.length === 0 && (
                   <p className="text-sm text-gray-500 text-center py-4">No milestones yet</p>
+                )}
+              </div>
+            </div>
+
+            {/* Deliverables */}
+            <div className="pt-4 border-t border-white/[0.08]">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-[11px] font-mono text-gray-500 uppercase tracking-wider">Deliverables</h4>
+                <PrimaryButton size="small" onClick={() => setShowDeliverableModal(true)}>
+                  <Plus className="w-3 h-3" />
+                  Add Deliverable
+                </PrimaryButton>
+              </div>
+              <div className="space-y-2">
+                {deliverables.map((deliverable) => (
+                  <div key={deliverable.id} className="flex items-center gap-3 p-3 bg-[#0E1116] rounded-sm group">
+                    <FileText className="w-4 h-4 text-emerald-500" />
+                    <div className="flex-1">
+                      <p className="text-sm text-white">{deliverable.name}</p>
+                      <p className="text-xs text-gray-500">{deliverable.file_type}</p>
+                    </div>
+                    <a
+                      href={deliverable.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-emerald-400 hover:text-emerald-300"
+                    >
+                      View
+                    </a>
+                    <button
+                      onClick={() => {
+                        if (confirm('Delete this deliverable?')) {
+                          deleteDeliverableMutation.mutate(deliverable.id);
+                        }
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-300 transition-opacity"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+                {deliverables.length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">No deliverables yet</p>
                 )}
               </div>
             </div>
@@ -382,6 +542,124 @@ export default function AdminProjects() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Add Milestone Modal */}
+      <Modal
+        isOpen={showMilestoneModal}
+        onClose={() => setShowMilestoneModal(false)}
+        title="Add Milestone"
+        size="default"
+      >
+        <form onSubmit={(e) => { e.preventDefault(); createMilestoneMutation.mutate(newMilestone); }} className="space-y-4">
+          <InputField
+            label="Milestone Title"
+            value={newMilestone.title}
+            onChange={(e) => setNewMilestone({ ...newMilestone, title: e.target.value })}
+            required
+            placeholder="Phase 1 Complete"
+          />
+          <TextAreaField
+            label="Description"
+            value={newMilestone.description}
+            onChange={(e) => setNewMilestone({ ...newMilestone, description: e.target.value })}
+            placeholder="Describe this milestone..."
+            rows={3}
+          />
+          <InputField
+            label="Due Date"
+            type="date"
+            value={newMilestone.due_date}
+            onChange={(e) => setNewMilestone({ ...newMilestone, due_date: e.target.value })}
+          />
+          <SelectField
+            label="Status"
+            value={newMilestone.status}
+            onChange={(e) => setNewMilestone({ ...newMilestone, status: e.target.value })}
+            options={[
+              { value: 'Pending', label: 'Pending' },
+              { value: 'In Progress', label: 'In Progress' },
+              { value: 'Completed', label: 'Completed' },
+            ]}
+          />
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/[0.08]">
+            <PrimaryButton variant="secondary" onClick={() => setShowMilestoneModal(false)} type="button">
+              Cancel
+            </PrimaryButton>
+            <PrimaryButton 
+              type="submit" 
+              loading={createMilestoneMutation.isPending}
+              disabled={!newMilestone.title}
+            >
+              Add Milestone
+            </PrimaryButton>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Add Deliverable Modal */}
+      <Modal
+        isOpen={showDeliverableModal}
+        onClose={() => setShowDeliverableModal(false)}
+        title="Add Deliverable"
+        size="default"
+      >
+        <form onSubmit={(e) => { e.preventDefault(); createDeliverableMutation.mutate(newDeliverable); }} className="space-y-4">
+          <InputField
+            label="Deliverable Name"
+            value={newDeliverable.name}
+            onChange={(e) => setNewDeliverable({ ...newDeliverable, name: e.target.value })}
+            required
+            placeholder="Final Logo Package"
+          />
+          
+          <div className="space-y-2">
+            <label className="block text-[11px] font-mono uppercase tracking-[0.15em] text-gray-400">
+              Upload File <span className="text-red-400">*</span>
+            </label>
+            <label className="cursor-pointer block">
+              <input
+                type="file"
+                onChange={handleFileUpload}
+                className="hidden"
+                disabled={uploadingFile}
+              />
+              <div className="flex items-center gap-2 px-4 py-3 bg-[#0E1116] border border-white/[0.08] rounded-sm text-gray-300 hover:border-emerald-500/50 transition-colors">
+                <Upload className="w-4 h-4" />
+                <span className="text-sm">
+                  {uploadingFile ? 'Uploading...' : newDeliverable.file_url ? 'File uploaded' : 'Choose file'}
+                </span>
+              </div>
+            </label>
+          </div>
+
+          <SelectField
+            label="File Type"
+            value={newDeliverable.file_type}
+            onChange={(e) => setNewDeliverable({ ...newDeliverable, file_type: e.target.value })}
+            options={[
+              { value: 'Document', label: 'Document' },
+              { value: 'Image', label: 'Image' },
+              { value: 'Video', label: 'Video' },
+              { value: 'Archive', label: 'Archive' },
+              { value: 'Other', label: 'Other' },
+            ]}
+          />
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/[0.08]">
+            <PrimaryButton variant="secondary" onClick={() => setShowDeliverableModal(false)} type="button">
+              Cancel
+            </PrimaryButton>
+            <PrimaryButton 
+              type="submit" 
+              loading={createDeliverableMutation.isPending}
+              disabled={!newDeliverable.name || !newDeliverable.file_url}
+            >
+              Add Deliverable
+            </PrimaryButton>
+          </div>
+        </form>
       </Modal>
     </div>
   );
