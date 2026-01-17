@@ -36,10 +36,30 @@ export default function AccountSetup() {
 
   const setupMutation = useMutation({
     mutationFn: async () => {
+      const user = await base44.auth.me();
+      
       await base44.auth.updateMe({
         display_name: formData.display_name,
         avatar_url: formData.avatar_url,
       });
+
+      // Notify admins about new user awaiting role assignment
+      const admins = await base44.entities.User.filter({ role: 'admin' });
+      for (const admin of admins) {
+        await base44.integrations.Core.SendEmail({
+          to: admin.email,
+          subject: 'New User Awaiting Role Assignment',
+          body: `
+            <h2>New User Registration</h2>
+            <p>A new user has completed account setup and is awaiting role assignment.</p>
+            <br/>
+            <p><strong>Name:</strong> ${formData.display_name}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <br/>
+            <p>Please log in to the admin portal to assign them a role (Client or Partner).</p>
+          `
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['currentUser']);
