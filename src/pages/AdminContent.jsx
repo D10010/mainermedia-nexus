@@ -59,41 +59,52 @@ export default function AdminContent() {
 
       // Send notifications if published
       if (data.is_published) {
-        const clients = await base44.entities.Client.list();
-        const partners = await base44.entities.Partner.list();
-        
-        const notifications = [];
-        
-        if (data.target_audience === 'All' || data.target_audience === 'Clients') {
-          clients.forEach(client => {
-            if (client.user_id) {
-              notifications.push({
-                user_id: client.user_id,
-                title: announcement.title,
-                message: announcement.content,
-                type: data.priority === 'High' ? 'alert' : 'info',
-                link: 'ClientDashboard'
-              });
-            }
-          });
-        }
-        
-        if (data.target_audience === 'All' || data.target_audience === 'Partners') {
-          partners.forEach(partner => {
-            if (partner.user_id) {
-              notifications.push({
-                user_id: partner.user_id,
-                title: announcement.title,
-                message: announcement.content,
-                type: data.priority === 'High' ? 'alert' : 'info',
-                link: 'PartnerDashboard'
-              });
-            }
-          });
-        }
-        
-        if (notifications.length > 0) {
-          await base44.entities.Notification.bulkCreate(notifications);
+        try {
+          const [clients, partners, users] = await Promise.all([
+            base44.entities.Client.list(),
+            base44.entities.Partner.list(),
+            base44.entities.User.list()
+          ]);
+          
+          const userEmails = new Set(users.map(u => u.email));
+          const notifications = [];
+          
+          if (data.target_audience === 'All' || data.target_audience === 'Clients') {
+            clients.forEach(client => {
+              if (client.user_id && userEmails.has(client.user_id)) {
+                notifications.push({
+                  user_id: client.user_id,
+                  title: announcement.title,
+                  message: announcement.content,
+                  type: data.priority === 'High' ? 'alert' : 'info',
+                  link: 'ClientDashboard'
+                });
+              }
+            });
+          }
+          
+          if (data.target_audience === 'All' || data.target_audience === 'Partners') {
+            partners.forEach(partner => {
+              if (partner.user_id && partner.status === 'Approved' && userEmails.has(partner.user_id)) {
+                notifications.push({
+                  user_id: partner.user_id,
+                  title: announcement.title,
+                  message: announcement.content,
+                  type: data.priority === 'High' ? 'alert' : 'info',
+                  link: 'PartnerDashboard'
+                });
+              }
+            });
+          }
+          
+          if (notifications.length > 0) {
+            await base44.entities.Notification.bulkCreate(notifications);
+            console.log(`Created ${notifications.length} notifications for announcement`);
+          } else {
+            console.warn('No notifications created - no valid recipients found');
+          }
+        } catch (error) {
+          console.error('Failed to send notifications:', error);
         }
       }
       
@@ -117,41 +128,52 @@ export default function AdminContent() {
 
       // Send notifications if just published
       if (wasJustPublished) {
-        const clients = await base44.entities.Client.list();
-        const partners = await base44.entities.Partner.list();
-        
-        const notifications = [];
-        
-        if (data.target_audience === 'All' || data.target_audience === 'Clients') {
-          clients.forEach(client => {
-            if (client.user_id) {
-              notifications.push({
-                user_id: client.user_id,
-                title: data.title,
-                message: data.content,
-                type: data.priority === 'High' ? 'alert' : 'info',
-                link: 'ClientDashboard'
-              });
-            }
-          });
-        }
-        
-        if (data.target_audience === 'All' || data.target_audience === 'Partners') {
-          partners.forEach(partner => {
-            if (partner.user_id) {
-              notifications.push({
-                user_id: partner.user_id,
-                title: data.title,
-                message: data.content,
-                type: data.priority === 'High' ? 'alert' : 'info',
-                link: 'PartnerDashboard'
-              });
-            }
-          });
-        }
-        
-        if (notifications.length > 0) {
-          await base44.entities.Notification.bulkCreate(notifications);
+        try {
+          const [clients, partners, users] = await Promise.all([
+            base44.entities.Client.list(),
+            base44.entities.Partner.list(),
+            base44.entities.User.list()
+          ]);
+          
+          const userEmails = new Set(users.map(u => u.email));
+          const notifications = [];
+          
+          if (data.target_audience === 'All' || data.target_audience === 'Clients') {
+            clients.forEach(client => {
+              if (client.user_id && userEmails.has(client.user_id)) {
+                notifications.push({
+                  user_id: client.user_id,
+                  title: data.title,
+                  message: data.content,
+                  type: data.priority === 'High' ? 'alert' : 'info',
+                  link: 'ClientDashboard'
+                });
+              }
+            });
+          }
+          
+          if (data.target_audience === 'All' || data.target_audience === 'Partners') {
+            partners.forEach(partner => {
+              if (partner.user_id && partner.status === 'Approved' && userEmails.has(partner.user_id)) {
+                notifications.push({
+                  user_id: partner.user_id,
+                  title: data.title,
+                  message: data.content,
+                  type: data.priority === 'High' ? 'alert' : 'info',
+                  link: 'PartnerDashboard'
+                });
+              }
+            });
+          }
+          
+          if (notifications.length > 0) {
+            await base44.entities.Notification.bulkCreate(notifications);
+            console.log(`Created ${notifications.length} notifications for announcement`);
+          } else {
+            console.warn('No notifications created - no valid recipients found');
+          }
+        } catch (error) {
+          console.error('Failed to send notifications:', error);
         }
       }
       
