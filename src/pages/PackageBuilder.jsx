@@ -93,7 +93,7 @@ export default function PackageBuilder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['packages']);
-      navigate('/admin-packages');
+      navigate(createPageUrl('AdminPackages'));
     }
   });
 

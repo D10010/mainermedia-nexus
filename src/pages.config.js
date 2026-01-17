@@ -5,6 +5,7 @@ import AdminCommissions from './pages/AdminCommissions';
 import AdminContent from './pages/AdminContent';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLeads from './pages/AdminLeads';
+import AdminPackages from './pages/AdminPackages';
 import AdminPartners from './pages/AdminPartners';
 import AdminPayouts from './pages/AdminPayouts';
 import AdminProjects from './pages/AdminProjects';
@@ -19,14 +20,13 @@ import ClientSettings from './pages/ClientSettings';
 import Home from './pages/Home';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
+import PackageBuilder from './pages/PackageBuilder';
 import PartnerCommissions from './pages/PartnerCommissions';
 import PartnerDashboard from './pages/PartnerDashboard';
 import PartnerLeads from './pages/PartnerLeads';
 import PartnerPayouts from './pages/PartnerPayouts';
 import PartnerResources from './pages/PartnerResources';
 import PartnerSettings from './pages/PartnerSettings';
-import PackageBuilder from './pages/PackageBuilder';
-import AdminPackages from './pages/AdminPackages';
 import __Layout from './Layout.jsx';
 
 
@@ -38,6 +38,7 @@ export const PAGES = {
     "AdminContent": AdminContent,
     "AdminDashboard": AdminDashboard,
     "AdminLeads": AdminLeads,
+    "AdminPackages": AdminPackages,
     "AdminPartners": AdminPartners,
     "AdminPayouts": AdminPayouts,
     "AdminProjects": AdminProjects,
@@ -52,14 +53,13 @@ export const PAGES = {
     "Home": Home,
     "Messages": Messages,
     "Notifications": Notifications,
+    "PackageBuilder": PackageBuilder,
     "PartnerCommissions": PartnerCommissions,
     "PartnerDashboard": PartnerDashboard,
     "PartnerLeads": PartnerLeads,
     "PartnerPayouts": PartnerPayouts,
     "PartnerResources": PartnerResources,
     "PartnerSettings": PartnerSettings,
-    "PackageBuilder": PackageBuilder,
-    "AdminPackages": AdminPackages,
 }
 
 export const pagesConfig = {
