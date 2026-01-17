@@ -179,7 +179,7 @@ export default function QuoteTemplate({ packageData }) {
         <div className="mt-auto pt-3">
           <div className="w-full h-px mb-2" style={{ backgroundColor: 'rgba(16,185,129,0.3)' }}></div>
           <p className="text-[10px] text-center" style={{ color: '#6B7280' }}>
-            &copy; {year} MainerMedia Nexus. All rights reserved.
+            &copy; {year} MainerMedia. All rights reserved.
           </p>
         </div>
       </div>
@@ -269,7 +269,7 @@ export default function QuoteTemplate({ packageData }) {
         <div className="mt-auto pt-3">
           <div className="w-full h-px mb-2" style={{ backgroundColor: 'rgba(16,185,129,0.3)' }}></div>
           <p className="text-[10px] text-center" style={{ color: '#6B7280' }}>
-            &copy; {year} MainerMedia Nexus. All rights reserved.
+            &copy; {year} MainerMedia. All rights reserved.
           </p>
         </div>
       </div>
