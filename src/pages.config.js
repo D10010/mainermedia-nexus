@@ -22,6 +22,8 @@ import PartnerLeads from './pages/PartnerLeads';
 import PartnerPayouts from './pages/PartnerPayouts';
 import PartnerResources from './pages/PartnerResources';
 import PartnerSettings from './pages/PartnerSettings';
+import AccountSetup from './pages/AccountSetup';
+import AwaitingRole from './pages/AwaitingRole';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +52,8 @@ export const PAGES = {
     "PartnerPayouts": PartnerPayouts,
     "PartnerResources": PartnerResources,
     "PartnerSettings": PartnerSettings,
+    "AccountSetup": AccountSetup,
+    "AwaitingRole": AwaitingRole,
 }
 
 export const pagesConfig = {

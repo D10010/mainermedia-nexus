@@ -54,6 +54,31 @@ export default function Layout({ children, currentPageName }) {
     enabled: !!user?.email && user?.role !== 'admin',
   });
 
+  // Redirect logic for onboarding
+  React.useEffect(() => {
+    if (!user) return;
+
+    // Skip redirects for special pages
+    if (currentPageName === 'AccountSetup' || currentPageName === 'AwaitingRole') return;
+
+    // Check if user has completed account setup
+    if (!user.display_name && !user.full_name) {
+      window.location.href = '/AccountSetup';
+      return;
+    }
+
+    // For non-admin users, check if they have a role assigned
+    if (user.role !== 'admin') {
+      // Wait for client/partner queries to complete
+      if (client === undefined || partner === undefined) return;
+      
+      if (!client && !partner) {
+        window.location.href = '/AwaitingRole';
+        return;
+      }
+    }
+  }, [user, client, partner, currentPageName]);
+
   const { data: unreadMessages = [] } = useQuery({
     queryKey: ['unreadMessages', user?.email],
     queryFn: async () => {
