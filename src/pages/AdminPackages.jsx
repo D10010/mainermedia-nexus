@@ -48,6 +48,16 @@ export default function AdminPackages() {
     },
   });
 
+  const sendPackageMutation = useMutation({
+    mutationFn: async (packageId) => {
+      const response = await base44.functions.invoke('sendPackageQuote', { packageId });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['packages']);
+    },
+  });
+
   const columns = [
     {
       key: 'company_name',
@@ -262,14 +272,17 @@ export default function AdminPackages() {
                 <PrimaryButton
                   variant="secondary"
                   size="small"
-                  onClick={() => {
-                    updateStatusMutation.mutate({ id: selectedPackage.id, status: 'Sent' });
+                  onClick={async () => {
+                    if (window.confirm(`Send this package quote to ${selectedPackage.contact_email}?`)) {
+                      await sendPackageMutation.mutateAsync(selectedPackage.id);
+                      updateStatusMutation.mutate({ id: selectedPackage.id, status: 'Sent' });
+                    }
                   }}
-                  disabled={selectedPackage.status === 'Sent' || updateStatusMutation.isPending}
-                  loading={updateStatusMutation.isPending}
+                  disabled={selectedPackage.status === 'Sent' || sendPackageMutation.isPending || updateStatusMutation.isPending}
+                  loading={sendPackageMutation.isPending || updateStatusMutation.isPending}
                   icon={Mail}
                 >
-                  Mark as Sent
+                  {selectedPackage.status === 'Sent' ? 'Already Sent' : 'Send to Client'}
                 </PrimaryButton>
                 <PrimaryButton
                   variant="danger"
