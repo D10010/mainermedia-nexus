@@ -34,19 +34,29 @@ ${pkg.decision_deadline ? `Decision Deadline: ${new Date(pkg.decision_deadline).
 ${pkg.notes ? `\nNotes: ${pkg.notes}` : ''}
     `.trim();
 
+    // Send email to client
+    const emailBody = `Hello,\n\nWe're excited to present a custom engagement package tailored to ${pkg.company_name}'s needs.\n\nPackage Details:\n${packageSummary}\n\nPlease review the attached quote and let us know if you have any questions.\n\nBest regards,\nMainerMedia Team`;
+
+    await base44.integrations.Core.SendEmail({
+      to: pkg.contact_email,
+      subject: `Your Custom Engagement Package - ${pkg.company_name}`,
+      body: emailBody,
+      from_name: 'MainerMedia'
+    });
+
     // Create a notification for the admin who created the package
     await base44.asServiceRole.entities.Notification.create({
       user_id: user.email,
-      title: 'Package Ready to Send',
-      message: `Package for ${pkg.company_name} has been marked as ready. Please send the quote to ${pkg.contact_email} using your preferred email system.\n\n${packageSummary}`,
-      type: 'info',
+      title: 'Package Sent',
+      message: `Package for ${pkg.company_name} has been sent to ${pkg.contact_email}.\n\n${packageSummary}`,
+      type: 'success',
       link: 'AdminPackages',
       metadata: { packageId: packageId }
     });
 
     return Response.json({ 
       success: true,
-      message: `Package marked as ready. A notification has been created with the details to send to ${pkg.contact_email}.`
+      message: `Package sent to ${pkg.contact_email} and notification created.`
     });
 
   } catch (error) {
