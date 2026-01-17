@@ -241,7 +241,11 @@ export default function Notifications() {
                         {notification.title}
                       </h3>
                       <span className="text-xs text-gray-600 whitespace-nowrap">
-                        {new Date(notification.created_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })} {new Date(notification.created_date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                        {(() => {
+                          const date = new Date(notification.created_date);
+                          const estDate = new Date(date.getTime() - (5 * 60 * 60 * 1000));
+                          return estDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) + ' ' + estDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                        })()}
                       </span>
                     </div>
                     <p className={`text-sm mb-3 ${notification.read ? 'text-gray-500' : 'text-gray-300'}`}>
@@ -250,11 +254,14 @@ export default function Notifications() {
 
                     {/* Actions */}
                     <div className="flex flex-wrap gap-2">
-                      {notification.link && notification.metadata?.packageId && (
+                      {notification.link && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(createPageUrl(notification.link) + `?packageId=${notification.metadata.packageId}`);
+                            const url = notification.metadata?.packageId 
+                              ? createPageUrl(notification.link) + `?packageId=${notification.metadata.packageId}`
+                              : createPageUrl(notification.link);
+                            navigate(url);
                             updateMutation.mutate({
                               id: notification.id,
                               data: { read: true }
@@ -263,7 +270,7 @@ export default function Notifications() {
                           className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-emerald-500/20 text-emerald-400 rounded-sm hover:bg-emerald-500/30 transition-colors"
                         >
                           <ExternalLink className="w-3 h-3" />
-                          Send Package
+                          {notification.metadata?.packageId ? 'Send Package' : 'View Details'}
                         </button>
                       )}
 
