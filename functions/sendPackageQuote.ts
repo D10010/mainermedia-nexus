@@ -41,7 +41,7 @@ ${pkg.notes ? `\nNotes: ${pkg.notes}` : ''}
       message: `Package for ${pkg.company_name} has been marked as ready. Please send the quote to ${pkg.contact_email} using your preferred email system.\n\n${packageSummary}`,
       type: 'info',
       link: 'AdminPackages',
-      metadata: JSON.stringify({ packageId: packageId })
+      metadata: { packageId: packageId }
     });
 
     return Response.json({ 
