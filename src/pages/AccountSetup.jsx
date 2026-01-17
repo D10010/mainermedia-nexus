@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '../utils';
 import { User, Upload, X, ArrowRight } from 'lucide-react';
 import Panel from '@/components/ui/Panel';
 import InputField from '@/components/ui/InputField';
@@ -9,11 +11,24 @@ import MainerMediaLogo from '@/components/ui/MainerMediaLogo';
 
 export default function AccountSetup() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [formData, setFormData] = useState({
     display_name: '',
     avatar_url: '',
   });
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  // If user already has a name, redirect them
+  useEffect(() => {
+    if (user && (user.display_name || user.full_name)) {
+      navigate(createPageUrl('AdminDashboard'));
+    }
+  }, [user, navigate]);
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -36,7 +51,7 @@ export default function AccountSetup() {
 
   const setupMutation = useMutation({
     mutationFn: async () => {
-      const user = await base44.auth.me();
+      const currentUser = await base44.auth.me();
       
       await base44.auth.updateMe({
         display_name: formData.display_name,
@@ -44,36 +59,48 @@ export default function AccountSetup() {
       });
 
       // Notify admins about new user awaiting role assignment
-      const admins = await base44.entities.User.filter({ role: 'admin' });
-      for (const admin of admins) {
-        // Email notification
-        await base44.integrations.Core.SendEmail({
-          to: admin.email,
-          subject: 'New User Awaiting Role Assignment',
-          body: `
-            <h2>New User Registration</h2>
-            <p>A new user has completed account setup and is awaiting role assignment.</p>
-            <br/>
-            <p><strong>Name:</strong> ${formData.display_name}</p>
-            <p><strong>Email:</strong> ${user.email}</p>
-            <br/>
-            <p>Please log in to the admin portal to assign them a role (Client or Partner).</p>
-          `
-        });
+      try {
+        const admins = await base44.entities.User.filter({ role: 'admin' });
+        for (const admin of admins) {
+          // Email notification
+          try {
+            await base44.integrations.Core.SendEmail({
+              to: admin.email,
+              subject: 'New User Awaiting Role Assignment',
+              body: `
+                <h2>New User Registration</h2>
+                <p>A new user has completed account setup and is awaiting role assignment.</p>
+                <br/>
+                <p><strong>Name:</strong> ${formData.display_name}</p>
+                <p><strong>Email:</strong> ${currentUser.email}</p>
+                <br/>
+                <p>Please log in to the admin portal to assign them a role (Client or Partner).</p>
+              `
+            });
+          } catch (e) {
+            console.error('Failed to send email:', e);
+          }
 
-        // In-app notification
-        await base44.entities.Notification.create({
-          user_id: admin.email,
-          title: 'New User Awaiting Role',
-          message: `${formData.display_name} (${user.email}) has completed account setup and needs a role assignment.`,
-          type: 'alert',
-          link: 'AdminSettings'
-        });
+          // In-app notification
+          try {
+            await base44.entities.Notification.create({
+              user_id: admin.email,
+              title: 'New User Awaiting Role',
+              message: `${formData.display_name} (${currentUser.email}) has completed account setup and needs a role assignment.`,
+              type: 'alert',
+              link: 'AdminSettings'
+            });
+          } catch (e) {
+            console.error('Failed to create notification:', e);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to notify admins:', e);
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['currentUser']);
-      window.location.reload();
+      navigate(createPageUrl('AwaitingRole'));
     },
   });
 

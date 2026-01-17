@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import MainerMediaLogo from './components/ui/MainerMediaLogo';
 import {
   LayoutDashboard,
@@ -32,6 +32,7 @@ export default function Layout({ children, currentPageName }) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -67,7 +68,7 @@ export default function Layout({ children, currentPageName }) {
 
     // Check if user has completed account setup
     if (!user.display_name && !user.full_name) {
-      window.location.href = '/AccountSetup';
+      navigate(createPageUrl('AccountSetup'));
       return;
     }
 
@@ -77,11 +78,11 @@ export default function Layout({ children, currentPageName }) {
       if (client === undefined || partner === undefined) return;
       
       if (!client && !partner) {
-        window.location.href = '/AwaitingRole';
+        navigate(createPageUrl('AwaitingRole'));
         return;
       }
     }
-  }, [user, client, partner, currentPageName]);
+  }, [user, client, partner, currentPageName, navigate]);
 
   const { data: unreadMessages = [] } = useQuery({
     queryKey: ['unreadMessages', user?.email],

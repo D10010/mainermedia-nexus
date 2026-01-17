@@ -1,3 +1,4 @@
+import AccountSetup from './pages/AccountSetup';
 import AdminAnalytics from './pages/AdminAnalytics';
 import AdminClients from './pages/AdminClients';
 import AdminCommissions from './pages/AdminCommissions';
@@ -8,6 +9,7 @@ import AdminPartners from './pages/AdminPartners';
 import AdminPayouts from './pages/AdminPayouts';
 import AdminProjects from './pages/AdminProjects';
 import AdminSettings from './pages/AdminSettings';
+import AwaitingRole from './pages/AwaitingRole';
 import ClientAnalytics from './pages/ClientAnalytics';
 import ClientBilling from './pages/ClientBilling';
 import ClientDashboard from './pages/ClientDashboard';
@@ -22,12 +24,11 @@ import PartnerLeads from './pages/PartnerLeads';
 import PartnerPayouts from './pages/PartnerPayouts';
 import PartnerResources from './pages/PartnerResources';
 import PartnerSettings from './pages/PartnerSettings';
-import AccountSetup from './pages/AccountSetup';
-import AwaitingRole from './pages/AwaitingRole';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AccountSetup": AccountSetup,
     "AdminAnalytics": AdminAnalytics,
     "AdminClients": AdminClients,
     "AdminCommissions": AdminCommissions,
@@ -38,6 +39,7 @@ export const PAGES = {
     "AdminPayouts": AdminPayouts,
     "AdminProjects": AdminProjects,
     "AdminSettings": AdminSettings,
+    "AwaitingRole": AwaitingRole,
     "ClientAnalytics": ClientAnalytics,
     "ClientBilling": ClientBilling,
     "ClientDashboard": ClientDashboard,
@@ -52,8 +54,6 @@ export const PAGES = {
     "PartnerPayouts": PartnerPayouts,
     "PartnerResources": PartnerResources,
     "PartnerSettings": PartnerSettings,
-    "AccountSetup": AccountSetup,
-    "AwaitingRole": AwaitingRole,
 }
 
 export const pagesConfig = {
