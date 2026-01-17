@@ -79,6 +79,18 @@ export default function AdminPackages() {
     },
   });
 
+  const sendPackageEmailMutation = useMutation({
+    mutationFn: async (packageId) => {
+      const response = await base44.functions.invoke('sendPackageEmail', { packageId });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['packages']);
+      setSelectedPackage(null);
+      setShowDetailsModal(false);
+    },
+  });
+
   const handleDownloadPNG = async (packageData, companyName) => {
     try {
       setIsGenerating(true);
