@@ -16,6 +16,25 @@ export default function PackageBuilder() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(0);
+  
+  // Get clientId from URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const clientId = urlParams.get('clientId');
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: prefilledClient } = useQuery({
+    queryKey: ['client', clientId],
+    queryFn: async () => {
+      const clients = await base44.entities.Client.filter({ id: clientId });
+      return clients[0] || null;
+    },
+    enabled: !!clientId,
+  });
+
   const [formData, setFormData] = useState({
     company_name: '',
     contact_email: '',
@@ -31,10 +50,17 @@ export default function PackageBuilder() {
     notes: ''
   });
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
-  });
+  // Pre-fill form when client data is loaded
+  React.useEffect(() => {
+    if (prefilledClient) {
+      setFormData(prev => ({
+        ...prev,
+        client_id: prefilledClient.id,
+        company_name: prefilledClient.company_name || '',
+        contact_email: prefilledClient.user_id || '',
+      }));
+    }
+  }, [prefilledClient]);
 
   const calculateRetainer = () => {
     if (!formData.selected_option || formData.selected_option === 'Option 1 - Independent') {

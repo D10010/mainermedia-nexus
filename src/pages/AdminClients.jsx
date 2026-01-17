@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '../utils';
 import {
   Users,
   Plus,
@@ -11,7 +13,8 @@ import {
   Globe,
   Edit2,
   Trash2,
-  ExternalLink
+  ExternalLink,
+  FileText
 } from 'lucide-react';
 import Panel from '@/components/ui/Panel';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -24,6 +27,7 @@ import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
 
 export default function AdminClients() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showAddClient, setShowAddClient] = useState(false);
@@ -160,6 +164,16 @@ export default function AdminClients() {
       label: '',
       render: (row) => (
         <div className="flex items-center gap-2">
+          <button 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              navigate(createPageUrl('PackageBuilder') + `?clientId=${row.id}`);
+            }}
+            className="p-2 text-emerald-500 hover:text-emerald-400 transition-colors"
+            title="Create Quote"
+          >
+            <FileText className="w-4 h-4" />
+          </button>
           <button 
             onClick={(e) => { e.stopPropagation(); setSelectedClient(row); setShowEditModal(true); }}
             className="p-2 text-gray-500 hover:text-white transition-colors"
