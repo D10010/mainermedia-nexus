@@ -209,13 +209,25 @@ export default function AdminPackages() {
       key: 'id',
       label: 'ID',
       render: (pkg) => (
-        <span className="text-xs text-gray-500 font-mono">{pkg.id.substring(0, 8)}...</span>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(pkg.id);
+            alert('Package ID copied to clipboard');
+          }}
+          className="text-xs text-emerald-400 font-mono hover:text-emerald-300 hover:underline cursor-pointer"
+          title="Click to copy full ID"
+        >
+          {pkg.id.substring(0, 8)}...
+        </button>
       ),
     },
     {
       key: 'company_name',
       label: 'Company',
       sortable: true,
+      render: (pkg) => (
+        <span className="text-white font-medium">{pkg.company_name}</span>
+      ),
     },
     {
       key: 'selected_option',
