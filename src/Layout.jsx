@@ -124,6 +124,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Messages', icon: MessageSquare, page: 'Messages', badge: unreadCount },
     { name: 'Documents', icon: FileText, page: 'ClientDocuments' },
     { name: 'Billing', icon: CreditCard, page: 'ClientBilling' },
+    { name: 'Notifications', icon: Bell, page: 'Notifications', badge: unreadNotificationsCount },
     { name: 'Settings', icon: Settings, page: 'ClientSettings' },
   ];
 
@@ -134,6 +135,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Payouts', icon: Wallet, page: 'PartnerPayouts' },
     { name: 'Resources', icon: BookOpen, page: 'PartnerResources' },
     { name: 'Messages', icon: MessageSquare, page: 'Messages', badge: unreadCount },
+    { name: 'Notifications', icon: Bell, page: 'Notifications', badge: unreadNotificationsCount },
     { name: 'Settings', icon: Settings, page: 'PartnerSettings' },
   ];
 
@@ -147,6 +149,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Payouts', icon: Wallet, page: 'AdminPayouts' },
     { name: 'Content', icon: FileText, page: 'AdminContent' },
     { name: 'Analytics', icon: BarChart3, page: 'AdminAnalytics' },
+    { name: 'Notifications', icon: Bell, page: 'Notifications', badge: unreadNotificationsCount },
     { name: 'Settings', icon: Settings, page: 'AdminSettings' },
   ];
 

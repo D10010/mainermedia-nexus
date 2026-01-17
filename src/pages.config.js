@@ -24,6 +24,7 @@ import PartnerLeads from './pages/PartnerLeads';
 import PartnerPayouts from './pages/PartnerPayouts';
 import PartnerResources from './pages/PartnerResources';
 import PartnerSettings from './pages/PartnerSettings';
+import Notifications from './pages/Notifications';
 import __Layout from './Layout.jsx';
 
 
@@ -54,6 +55,7 @@ export const PAGES = {
     "PartnerPayouts": PartnerPayouts,
     "PartnerResources": PartnerResources,
     "PartnerSettings": PartnerSettings,
+    "Notifications": Notifications,
 }
 
 export const pagesConfig = {

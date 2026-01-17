@@ -88,7 +88,11 @@ export default function AccountSetup() {
               title: 'New User Awaiting Role',
               message: `${formData.display_name} (${currentUser.email}) has completed account setup and needs a role assignment.`,
               type: 'alert',
-              link: 'AdminSettings'
+              link: 'AdminSettings',
+              metadata: {
+                user_email: currentUser.email,
+                user_name: formData.display_name
+              }
             });
           } catch (e) {
             console.error('Failed to create notification:', e);
