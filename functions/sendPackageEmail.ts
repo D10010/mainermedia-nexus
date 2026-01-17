@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
             </p>
             
             <div class="footer">
-                <p>This is a custom engagement proposal. If you have any questions, please reply to this email or contact us directly.</p>
+                <p>If you have any questions, please contact us at <a href="mailto:hello@mainermedia.com" style="color: #10b981; text-decoration: none; font-weight: 500;">hello@mainermedia.com</a> or log in to your <a href="${Deno.env.get('APP_URL') || 'https://app.mainermedia.com'}" style="color: #10b981; text-decoration: none; font-weight: 500;">client portal</a>.</p>
             </div>
         </div>
     </div>
