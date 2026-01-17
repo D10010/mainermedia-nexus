@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import RoleGuard from '../components/RoleGuard';
 import { format } from 'date-fns';
 import {
   FileText,
@@ -175,6 +176,7 @@ export default function AdminContent() {
   ];
 
   return (
+    <RoleGuard allowedRoles={['admin']}>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -422,5 +424,6 @@ export default function AdminContent() {
         )}
       </Modal>
     </div>
+    </RoleGuard>
   );
 }
