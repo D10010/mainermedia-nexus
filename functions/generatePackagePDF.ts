@@ -151,12 +151,7 @@ Deno.serve(async (req) => {
     
     // Details box
     const detailsHeight = pkg.calculated_retainer > 0 ? (pkg.decision_deadline ? 48 : 40) : 30;
-    doc.setFillColor(...setColor(darkGray));
-    doc.setDrawColor(...setColor(teal));
-    doc.setLineWidth(1);
-    roundedRect(margin, y, pageWidth - margin * 2, detailsHeight, 3);
-    doc.fillRect(margin, y, pageWidth - margin * 2, detailsHeight);
-    roundedRect(margin, y, pageWidth - margin * 2, detailsHeight, 3);
+    drawBox(margin, y, pageWidth - margin * 2, detailsHeight);
     
     y += 10;
     doc.setFont('helvetica', 'normal');
