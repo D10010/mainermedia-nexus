@@ -61,6 +61,8 @@ export default function AccountSetup() {
       // Notify admins about new user awaiting role assignment
       try {
         const admins = await base44.entities.User.filter({ role: 'admin' });
+        console.log('Found admins:', admins);
+        
         for (const admin of admins) {
           // Email notification
           try {
@@ -77,13 +79,14 @@ export default function AccountSetup() {
                 <p>Please log in to the admin portal to assign them a role (Client or Partner).</p>
               `
             });
+            console.log('Email sent to:', admin.email);
           } catch (e) {
-            console.error('Failed to send email:', e);
+            console.error('Failed to send email to', admin.email, ':', e);
           }
 
           // In-app notification
           try {
-            await base44.entities.Notification.create({
+            const notification = await base44.entities.Notification.create({
               user_id: admin.email,
               title: 'New User Awaiting Role',
               message: `${formData.display_name} (${currentUser.email}) has completed account setup and needs a role assignment.`,
@@ -94,8 +97,9 @@ export default function AccountSetup() {
                 user_name: formData.display_name
               }
             });
+            console.log('Notification created:', notification);
           } catch (e) {
-            console.error('Failed to create notification:', e);
+            console.error('Failed to create notification for', admin.email, ':', e);
           }
         }
       } catch (e) {
