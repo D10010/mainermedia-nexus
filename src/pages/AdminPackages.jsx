@@ -58,6 +58,23 @@ export default function AdminPackages() {
     },
   });
 
+  const handleDownloadPDF = async (packageId, companyName) => {
+    try {
+      const response = await base44.functions.invoke('generatePackagePDF', { packageId });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Package-${companyName.replace(/\s+/g, '-')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+    }
+  };
+
   const columns = [
     {
       key: 'company_name',
@@ -269,6 +286,14 @@ export default function AdminPackages() {
 
               {/* Actions */}
               <div className="flex items-center gap-3 pt-4 border-t border-white/[0.08]">
+                <PrimaryButton
+                  variant="primary"
+                  size="small"
+                  onClick={() => handleDownloadPDF(selectedPackage.id, selectedPackage.company_name)}
+                  icon={Download}
+                >
+                  Download PDF
+                </PrimaryButton>
                 <PrimaryButton
                   variant="secondary"
                   size="small"
