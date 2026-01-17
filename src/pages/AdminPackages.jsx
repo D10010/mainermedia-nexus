@@ -533,7 +533,7 @@ export default function AdminPackages() {
                 </PrimaryButton>
                 <PrimaryButton
                   variant="primary"
-                  onClick={() => updatePackageMutation.mutate(selectedPackage)}
+                  onClick={() => updatePackageMutation.mutate({ packageId: selectedPackage.id, data: selectedPackage })}
                   loading={updatePackageMutation.isPending}
                   disabled={updatePackageMutation.isPending}
                 >
