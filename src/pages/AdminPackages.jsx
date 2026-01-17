@@ -92,6 +92,15 @@ export default function AdminPackages() {
     },
   });
 
+  const updatePackageMutation = useMutation({
+    mutationFn: (data) => base44.entities.Package.update(selectedPackage.id, data),
+    onSuccess: (updatedPackage) => {
+      queryClient.invalidateQueries(['packages']);
+      setSelectedPackage(updatedPackage);
+      setShowEditModal(false);
+    },
+  });
+
   const handleDownloadPNG = async (packageData, companyName) => {
     try {
       setIsGenerating(true);
