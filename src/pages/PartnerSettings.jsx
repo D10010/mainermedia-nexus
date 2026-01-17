@@ -37,7 +37,7 @@ export default function PartnerSettings() {
   });
 
   const [formData, setFormData] = useState({
-    full_name: '',
+    display_name: '',
     company_name: '',
     payment_method: 'PayPal',
     payment_details: '',
@@ -49,7 +49,7 @@ export default function PartnerSettings() {
   useEffect(() => {
     if (user || partner) {
       setFormData({
-        full_name: user?.full_name || '',
+        display_name: user?.display_name || user?.full_name || '',
         company_name: partner?.company_name || '',
         payment_method: partner?.payment_method || 'PayPal',
         payment_details: partner?.payment_details || '',
@@ -90,7 +90,7 @@ export default function PartnerSettings() {
   const updateProfileMutation = useMutation({
     mutationFn: async () => {
       await base44.auth.updateMe({
-        full_name: formData.full_name,
+        display_name: formData.display_name,
         avatar_url: formData.avatar_url,
       });
       
@@ -231,13 +231,13 @@ export default function PartnerSettings() {
                     ) : (
                       <div className="w-20 h-20 rounded-sm bg-emerald-500/20 flex items-center justify-center">
                         <span className="text-emerald-500 text-2xl font-medium">
-                          {formData.full_name?.[0]?.toUpperCase() || 'P'}
+                          {formData.display_name?.[0]?.toUpperCase() || 'P'}
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="text-white font-medium">{formData.full_name || 'Partner'}</p>
+                    <p className="text-white font-medium">{formData.display_name || 'Partner'}</p>
                     <p className="text-gray-500 text-sm mb-3">{user?.email}</p>
                     <label className="cursor-pointer">
                       <input
@@ -257,9 +257,9 @@ export default function PartnerSettings() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/[0.08]">
                   <InputField
-                    label="Full Name"
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                    label="Display Name"
+                    value={formData.display_name}
+                    onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
                     icon={User}
                   />
                   <InputField

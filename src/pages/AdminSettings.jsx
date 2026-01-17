@@ -34,14 +34,14 @@ export default function AdminSettings() {
   });
 
   const [profileData, setProfileData] = useState({
-    full_name: '',
+    display_name: '',
     avatar_url: '',
   });
 
   React.useEffect(() => {
     if (currentUser) {
       setProfileData({
-        full_name: currentUser.full_name || '',
+        display_name: currentUser.display_name || currentUser.full_name || '',
         avatar_url: currentUser.avatar_url || '',
       });
     }
@@ -79,7 +79,7 @@ export default function AdminSettings() {
   const updateProfileMutation = useMutation({
     mutationFn: async () => {
       await base44.auth.updateMe({
-        full_name: profileData.full_name,
+        display_name: profileData.display_name,
         avatar_url: profileData.avatar_url,
       });
     },
@@ -188,13 +188,13 @@ export default function AdminSettings() {
                     ) : (
                       <div className="w-20 h-20 rounded-sm bg-emerald-500/20 flex items-center justify-center">
                         <span className="text-emerald-500 text-2xl font-medium">
-                          {profileData.full_name?.[0]?.toUpperCase() || 'A'}
+                          {profileData.display_name?.[0]?.toUpperCase() || 'A'}
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="text-white font-medium">{profileData.full_name || 'Admin'}</p>
+                    <p className="text-white font-medium">{profileData.display_name || 'Admin'}</p>
                     <p className="text-gray-500 text-sm mb-3">{currentUser?.email}</p>
                     <label className="cursor-pointer">
                       <input
@@ -215,8 +215,8 @@ export default function AdminSettings() {
                 <div className="pt-6 border-t border-white/[0.08]">
                   <InputField
                     label="Display Name"
-                    value={profileData.full_name}
-                    onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                    value={profileData.display_name}
+                    onChange={(e) => setProfileData({ ...profileData, display_name: e.target.value })}
                     icon={UserIcon}
                   />
                 </div>

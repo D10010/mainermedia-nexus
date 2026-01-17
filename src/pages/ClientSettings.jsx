@@ -39,7 +39,7 @@ export default function ClientSettings() {
   });
 
   const [formData, setFormData] = useState({
-    full_name: '',
+    display_name: '',
     company_name: '',
     website: '',
     industry: '',
@@ -60,7 +60,7 @@ export default function ClientSettings() {
   React.useEffect(() => {
     if (user || client) {
       setFormData({
-        full_name: user?.full_name || '',
+        display_name: user?.display_name || user?.full_name || '',
         company_name: client?.company_name || '',
         website: client?.website || '',
         industry: client?.industry || '',
@@ -104,7 +104,7 @@ export default function ClientSettings() {
     mutationFn: async () => {
       // Update user profile
       await base44.auth.updateMe({
-        full_name: formData.full_name,
+        display_name: formData.display_name,
         phone: formData.phone,
         avatar_url: formData.avatar_url,
       });
@@ -203,13 +203,13 @@ export default function ClientSettings() {
                     ) : (
                       <div className="w-20 h-20 rounded-sm bg-emerald-500/20 flex items-center justify-center">
                         <span className="text-emerald-500 text-2xl font-medium">
-                          {formData.full_name?.[0]?.toUpperCase() || 'U'}
+                          {formData.display_name?.[0]?.toUpperCase() || 'U'}
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="text-white font-medium">{formData.full_name || 'Your Name'}</p>
+                    <p className="text-white font-medium">{formData.display_name || 'Your Name'}</p>
                     <p className="text-gray-500 text-sm mb-3">{user?.email}</p>
                     <label className="cursor-pointer">
                       <input
@@ -229,9 +229,9 @@ export default function ClientSettings() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/[0.08]">
                   <InputField
-                    label="Full Name"
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                    label="Display Name"
+                    value={formData.display_name}
+                    onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
                     icon={User}
                   />
                   <InputField

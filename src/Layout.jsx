@@ -176,12 +176,12 @@ export default function Layout({ children, currentPageName }) {
                 ) : (
                   <div className="w-8 h-8 rounded-sm bg-emerald-500/20 flex items-center justify-center">
                     <span className="text-emerald-500 text-sm font-medium">
-                      {user?.full_name?.[0]?.toUpperCase() || 'U'}
+                      {(user?.display_name || user?.full_name)?.[0]?.toUpperCase() || 'U'}
                     </span>
                   </div>
                 )}
                 <div className="hidden md:block text-left">
-                  <p className="text-sm text-white">{user?.full_name || 'User'}</p>
+                  <p className="text-sm text-white">{user?.display_name || user?.full_name || 'User'}</p>
                   <p className="text-[10px] font-mono text-gray-500 uppercase">
                     {userType}
                   </p>
