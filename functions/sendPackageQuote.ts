@@ -16,8 +16,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch the package details
-    const packages = await base44.asServiceRole.entities.Package.filter({ id: packageId });
-    const pkg = packages[0];
+    const pkg = await base44.asServiceRole.entities.Package.get(packageId);
 
     if (!pkg) {
       return Response.json({ error: 'Package not found' }, { status: 404 });
