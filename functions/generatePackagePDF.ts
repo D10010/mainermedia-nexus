@@ -67,9 +67,12 @@ Deno.serve(async (req) => {
       return false;
     };
     
-    // Helper to draw rounded rect
-    const roundedRect = (x, y, w, h, r) => {
-      doc.roundedRect(x, y, w, h, r, r);
+    // Helper to draw rounded rect (jsPDF built-in)
+    const drawBox = (x, y, w, h) => {
+      doc.setFillColor(...setColor(darkGray));
+      doc.setDrawColor(...setColor(teal));
+      doc.setLineWidth(1);
+      doc.rect(x, y, w, h, 'FD'); // Fill and Draw
     };
     
     // ===== PAGE 1 =====
@@ -112,12 +115,7 @@ Deno.serve(async (req) => {
     
     // Company Info Box
     const boxHeight = 28;
-    doc.setFillColor(...setColor(darkGray));
-    doc.setDrawColor(...setColor(teal));
-    doc.setLineWidth(1);
-    roundedRect(margin, y, pageWidth - margin * 2, boxHeight, 3);
-    doc.fillRect(margin, y, pageWidth - margin * 2, boxHeight);
-    roundedRect(margin, y, pageWidth - margin * 2, boxHeight, 3);
+    drawBox(margin, y, pageWidth - margin * 2, boxHeight);
     
     y += 10;
     doc.setFont('helvetica', 'bold');
@@ -224,12 +222,7 @@ Deno.serve(async (req) => {
       const profileItems = [pkg.company_scale, pkg.annual_revenue, pkg.gross_profit_margin, pkg.growth_target].filter(Boolean).length;
       const profileHeight = 8 + (profileItems * 8);
       
-      doc.setFillColor(...setColor(darkGray));
-      doc.setDrawColor(...setColor(teal));
-      doc.setLineWidth(1);
-      roundedRect(margin, y, pageWidth - margin * 2, profileHeight, 3);
-      doc.fillRect(margin, y, pageWidth - margin * 2, profileHeight, 3);
-      roundedRect(margin, y, pageWidth - margin * 2, profileHeight, 3);
+      drawBox(margin, y, pageWidth - margin * 2, profileHeight);
       
       y += 10;
       doc.setFont('helvetica', 'normal');
@@ -289,12 +282,7 @@ Deno.serve(async (req) => {
       y += 12;
       
       const termsHeight = 55;
-      doc.setFillColor(...setColor(darkGray));
-      doc.setDrawColor(...setColor(teal));
-      doc.setLineWidth(1);
-      roundedRect(margin, y, pageWidth - margin * 2, termsHeight, 3);
-      doc.fillRect(margin, y, pageWidth - margin * 2, termsHeight, 3);
-      roundedRect(margin, y, pageWidth - margin * 2, termsHeight, 3);
+      drawBox(margin, y, pageWidth - margin * 2, termsHeight);
       
       y += 10;
       doc.setFont('helvetica', 'normal');
@@ -340,12 +328,7 @@ Deno.serve(async (req) => {
       const splitNotes = doc.splitTextToSize(pkg.notes, pageWidth - margin * 2 - 10);
       const notesHeight = 10 + (splitNotes.length * 5);
       
-      doc.setFillColor(...setColor(darkGray));
-      doc.setDrawColor(...setColor(teal));
-      doc.setLineWidth(1);
-      roundedRect(margin, y, pageWidth - margin * 2, notesHeight, 3);
-      doc.fillRect(margin, y, pageWidth - margin * 2, notesHeight, 3);
-      roundedRect(margin, y, pageWidth - margin * 2, notesHeight, 3);
+      drawBox(margin, y, pageWidth - margin * 2, notesHeight);
       
       y += 8;
       doc.setFont('helvetica', 'normal');
