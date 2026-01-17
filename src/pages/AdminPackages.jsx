@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -10,6 +10,8 @@ import StatusBadge from '../components/ui/StatusBadge';
 import EmptyState from '../components/ui/EmptyState';
 import DataTable from '../components/ui/DataTable';
 import Modal from '../components/ui/Modal';
+import QuoteTemplate from '../components/QuoteTemplate';
+import html2canvas from 'html2canvas';
 import { Plus, Package, Eye, Trash2, Mail, Download } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -17,6 +19,8 @@ export default function AdminPackages() {
   const queryClient = useQueryClient();
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const quoteRef = useRef(null);
 
   const { data: packages = [], isLoading } = useQuery({
     queryKey: ['packages'],
@@ -58,20 +62,66 @@ export default function AdminPackages() {
     },
   });
 
-  const handleDownloadPDF = async (packageId, companyName) => {
+  const handleDownloadPNG = async (packageData, companyName) => {
     try {
-      const response = await base44.functions.invoke('generatePackagePDF', { packageId });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Package-${companyName.replace(/\s+/g, '-')}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
+      setIsGenerating(true);
+      
+      // Wait for next tick to ensure render
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      if (!quoteRef.current) {
+        throw new Error('Quote template not found');
+      }
+
+      // Capture page 1
+      const page1Element = quoteRef.current.children[0];
+      const canvas1 = await html2canvas(page1Element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#000000',
+        logging: false,
+      });
+      
+      // Capture page 2
+      const page2Element = quoteRef.current.children[1];
+      const canvas2 = await html2canvas(page2Element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#000000',
+        logging: false,
+      });
+
+      // Download page 1
+      canvas1.toBlob((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Package-${companyName.replace(/\s+/g, '-')}-page1.png`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      }, 'image/png');
+
+      // Download page 2
+      setTimeout(() => {
+        canvas2.toBlob((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Package-${companyName.replace(/\s+/g, '-')}-page2.png`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          a.remove();
+        }, 'image/png');
+      }, 500);
+
+      setIsGenerating(false);
     } catch (error) {
-      console.error('Error downloading PDF:', error);
+      console.error('Error generating PNG:', error);
+      setIsGenerating(false);
+      alert('Failed to generate quote images. Please try again.');
     }
   };
 
@@ -289,10 +339,12 @@ export default function AdminPackages() {
                 <PrimaryButton
                   variant="primary"
                   size="small"
-                  onClick={() => handleDownloadPDF(selectedPackage.id, selectedPackage.company_name)}
+                  onClick={() => handleDownloadPNG(selectedPackage, selectedPackage.company_name)}
                   icon={Download}
+                  loading={isGenerating}
+                  disabled={isGenerating}
                 >
-                  Download PDF
+                  {isGenerating ? 'Generating...' : 'Download Quote'}
                 </PrimaryButton>
                 <PrimaryButton
                   variant="secondary"
@@ -328,6 +380,13 @@ export default function AdminPackages() {
             </div>
           </Modal>
         )}
+
+        {/* Hidden Quote Template for PNG generation */}
+        <div className="fixed -left-[9999px] top-0">
+          <div ref={quoteRef}>
+            {selectedPackage && <QuoteTemplate packageData={selectedPackage} />}
+          </div>
+        </div>
       </div>
     </RoleGuard>
   );
