@@ -460,6 +460,84 @@ export default function AdminPackages() {
           </Modal>
         )}
 
+        {/* Edit Modal */}
+        {showEditModal && selectedPackage && (
+          <Modal
+            isOpen={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            title="Edit Package"
+            size="large"
+          >
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-2 uppercase font-mono">Company Name</label>
+                  <input
+                    type="text"
+                    value={selectedPackage.company_name}
+                    onChange={(e) => setSelectedPackage({...selectedPackage, company_name: e.target.value})}
+                    className="w-full bg-[#0E1116] border border-white/[0.08] rounded-sm px-3 py-2 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-2 uppercase font-mono">Contact Email</label>
+                  <input
+                    type="email"
+                    value={selectedPackage.contact_email}
+                    onChange={(e) => setSelectedPackage({...selectedPackage, contact_email: e.target.value})}
+                    className="w-full bg-[#0E1116] border border-white/[0.08] rounded-sm px-3 py-2 text-white"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-2 uppercase font-mono">Contact Phone</label>
+                <input
+                  type="tel"
+                  value={selectedPackage.contact_phone || ''}
+                  onChange={(e) => setSelectedPackage({...selectedPackage, contact_phone: e.target.value})}
+                  className="w-full bg-[#0E1116] border border-white/[0.08] rounded-sm px-3 py-2 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-2 uppercase font-mono">Probation Months</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="12"
+                  value={selectedPackage.probation_months || 3}
+                  onChange={(e) => setSelectedPackage({...selectedPackage, probation_months: parseInt(e.target.value)})}
+                  className="w-full bg-[#0E1116] border border-white/[0.08] rounded-sm px-3 py-2 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-2 uppercase font-mono">Notes</label>
+                <textarea
+                  value={selectedPackage.notes || ''}
+                  onChange={(e) => setSelectedPackage({...selectedPackage, notes: e.target.value})}
+                  className="w-full bg-[#0E1116] border border-white/[0.08] rounded-sm px-3 py-2 text-white"
+                  rows="4"
+                />
+              </div>
+              <div className="flex gap-3 pt-4 border-t border-white/[0.08]">
+                <PrimaryButton
+                  variant="secondary"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </PrimaryButton>
+                <PrimaryButton
+                  variant="primary"
+                  onClick={() => updatePackageMutation.mutate(selectedPackage)}
+                  loading={updatePackageMutation.isPending}
+                  disabled={updatePackageMutation.isPending}
+                >
+                  Save Changes
+                </PrimaryButton>
+              </div>
+            </div>
+          </Modal>
+        )}
+
         {/* Hidden Quote Template for PNG generation */}
         {selectedPackage && (
           <div 
