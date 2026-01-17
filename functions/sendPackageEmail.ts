@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
       to: pkg.contact_email,
       subject: `Your Custom Engagement Package - ${pkg.company_name}`,
       body: emailBody,
-      from_name: 'MainerMedia'
+      from_name: senderName
     });
 
     // Update package status to Sent
