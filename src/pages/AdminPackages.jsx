@@ -10,7 +10,7 @@ import StatusBadge from '../components/ui/StatusBadge';
 import EmptyState from '../components/ui/EmptyState';
 import DataTable from '../components/ui/DataTable';
 import Modal from '../components/ui/Modal';
-import { Plus, Package, Eye, Trash2, Mail } from 'lucide-react';
+import { Plus, Package, Eye, Trash2, Mail, Download } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AdminPackages() {
