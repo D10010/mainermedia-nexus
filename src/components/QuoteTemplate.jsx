@@ -28,12 +28,9 @@ export default function QuoteTemplate({ packageData }) {
             backdropFilter: 'blur(20px) saturate(180%)'
           }}
         >
-          <h1 className="text-5xl font-bold mb-2 tracking-tight" style={{ color: '#FFFFFF' }}>
+          <h1 className="text-5xl font-bold mb-4 tracking-tight" style={{ color: '#FFFFFF' }}>
             MAINERMEDIA
           </h1>
-          <h2 className="text-4xl font-bold mb-3" style={{ color: '#10b981' }}>
-            NEXUS
-          </h2>
           <h3 className="text-2xl font-medium mb-3" style={{ color: '#E5E7EB' }}>
             Custom Engagement Package
           </h3>
@@ -266,32 +263,7 @@ export default function QuoteTemplate({ packageData }) {
           </div>
         )}
 
-        {/* Call to Action with CTA Background */}
-        <div className="mb-4 flex-1 flex items-center justify-center">
-          <div 
-            className="rounded-lg p-6 text-center shadow-2xl max-w-2xl w-full"
-            style={{
-              background: 'linear-gradient(135deg, rgba(16,185,129,0.9) 0%, rgba(5,150,105,0.9) 100%)',
-              border: '1px solid #10b981'
-            }}
-          >
-            <p className="text-base leading-relaxed mb-4 font-medium" style={{ color: '#FFFFFF' }}>
-              Ready to begin? Let us schedule your initial discovery call to discuss the Audit process.
-            </p>
-            
-            <div className="text-center">
-              <h2 className="text-3xl font-bold mb-2 tracking-tight" style={{ color: '#FFFFFF' }}>
-                MAINERMEDIA
-              </h2>
-              <p className="text-base mb-1 font-medium" style={{ color: '#34d399' }}>
-                Contact us at mainermedia.com
-              </p>
-              <p className="text-base font-semibold" style={{ color: '#34d399' }}>
-                Book a Call &rarr;
-              </p>
-            </div>
-          </div>
-        </div>
+
 
         {/* Footer */}
         <div className="mt-auto pt-3">
