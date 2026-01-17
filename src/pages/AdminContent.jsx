@@ -51,10 +51,54 @@ export default function AdminContent() {
   });
 
   const createAnnouncementMutation = useMutation({
-    mutationFn: (data) => base44.entities.Announcement.create({
-      ...data,
-      published_at: data.is_published ? new Date().toISOString() : null,
-    }),
+    mutationFn: async (data) => {
+      const announcement = await base44.entities.Announcement.create({
+        ...data,
+        published_at: data.is_published ? new Date().toISOString() : null,
+      });
+
+      // Send notifications if published
+      if (data.is_published) {
+        const clients = await base44.entities.Client.list();
+        const partners = await base44.entities.Partner.list();
+        
+        const notifications = [];
+        
+        if (data.target_audience === 'All' || data.target_audience === 'Clients') {
+          clients.forEach(client => {
+            if (client.user_id) {
+              notifications.push({
+                user_id: client.user_id,
+                title: announcement.title,
+                message: announcement.content,
+                type: data.priority === 'High' ? 'alert' : 'info',
+                link: 'ClientDashboard'
+              });
+            }
+          });
+        }
+        
+        if (data.target_audience === 'All' || data.target_audience === 'Partners') {
+          partners.forEach(partner => {
+            if (partner.user_id) {
+              notifications.push({
+                user_id: partner.user_id,
+                title: announcement.title,
+                message: announcement.content,
+                type: data.priority === 'High' ? 'alert' : 'info',
+                link: 'PartnerDashboard'
+              });
+            }
+          });
+        }
+        
+        if (notifications.length > 0) {
+          await base44.entities.Notification.bulkCreate(notifications);
+        }
+      }
+      
+      return announcement;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['allAnnouncements']);
       setShowAddModal(false);
@@ -63,10 +107,56 @@ export default function AdminContent() {
   });
 
   const updateAnnouncementMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Announcement.update(id, {
-      ...data,
-      published_at: data.is_published && !selectedItem?.is_published ? new Date().toISOString() : selectedItem?.published_at,
-    }),
+    mutationFn: async ({ id, data }) => {
+      const wasJustPublished = data.is_published && !selectedItem?.is_published;
+      
+      const announcement = await base44.entities.Announcement.update(id, {
+        ...data,
+        published_at: wasJustPublished ? new Date().toISOString() : selectedItem?.published_at,
+      });
+
+      // Send notifications if just published
+      if (wasJustPublished) {
+        const clients = await base44.entities.Client.list();
+        const partners = await base44.entities.Partner.list();
+        
+        const notifications = [];
+        
+        if (data.target_audience === 'All' || data.target_audience === 'Clients') {
+          clients.forEach(client => {
+            if (client.user_id) {
+              notifications.push({
+                user_id: client.user_id,
+                title: data.title,
+                message: data.content,
+                type: data.priority === 'High' ? 'alert' : 'info',
+                link: 'ClientDashboard'
+              });
+            }
+          });
+        }
+        
+        if (data.target_audience === 'All' || data.target_audience === 'Partners') {
+          partners.forEach(partner => {
+            if (partner.user_id) {
+              notifications.push({
+                user_id: partner.user_id,
+                title: data.title,
+                message: data.content,
+                type: data.priority === 'High' ? 'alert' : 'info',
+                link: 'PartnerDashboard'
+              });
+            }
+          });
+        }
+        
+        if (notifications.length > 0) {
+          await base44.entities.Notification.bulkCreate(notifications);
+        }
+      }
+      
+      return announcement;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['allAnnouncements']);
       setSelectedItem(null);
