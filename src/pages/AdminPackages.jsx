@@ -66,54 +66,66 @@ export default function AdminPackages() {
     try {
       setIsGenerating(true);
       
-      // Wait for DOM to render
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Make template visible
+      const container = document.getElementById('quote-render-container');
+      if (!container) {
+        throw new Error('Container not found');
+      }
+      container.style.position = 'fixed';
+      container.style.top = '0';
+      container.style.left = '0';
+      container.style.zIndex = '9999';
+      container.style.opacity = '1';
+      
+      // Wait for render
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       if (!quoteRef.current) {
-        console.error('Quote template ref not found');
         throw new Error('Quote template not found');
       }
 
-      // Get the template wrapper div
       const templateWrapper = quoteRef.current.querySelector('.quote-template-wrapper');
       if (!templateWrapper) {
-        console.error('Template wrapper not found');
         throw new Error('Template wrapper not found');
       }
 
       const pages = templateWrapper.children;
       if (!pages || pages.length < 2) {
-        console.error('Pages not found in template, found:', pages ? pages.length : 0);
         throw new Error('Pages not found');
       }
 
       // Capture page 1
-      const page1Element = pages[0];
-      console.log('Capturing page 1...', page1Element);
-      const canvas1 = await html2canvas(page1Element, {
+      const canvas1 = await html2canvas(pages[0], {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#000000',
-        logging: false,
+        backgroundColor: '#0a0c10',
+        logging: true,
+        windowWidth: 794,
+        windowHeight: 1123,
       });
       
       // Capture page 2
-      const page2Element = pages[1];
-      console.log('Capturing page 2...', page2Element);
-      const canvas2 = await html2canvas(page2Element, {
+      const canvas2 = await html2canvas(pages[1], {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#000000',
-        logging: false,
+        backgroundColor: '#0a0c10',
+        logging: true,
+        windowWidth: 794,
+        windowHeight: 1123,
       });
+
+      // Hide template again
+      container.style.position = 'fixed';
+      container.style.top = '0';
+      container.style.left = '0';
+      container.style.opacity = '0';
+      container.style.zIndex = '-1';
 
       // Download page 1
       canvas1.toBlob((blob) => {
-        if (!blob) {
-          throw new Error('Failed to create blob for page 1');
-        }
+        if (!blob) throw new Error('Failed to create blob for page 1');
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -124,22 +136,20 @@ export default function AdminPackages() {
         a.remove();
       }, 'image/png');
 
-      // Download page 2 after a short delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      canvas2.toBlob((blob) => {
-        if (!blob) {
-          throw new Error('Failed to create blob for page 2');
-        }
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Package-${companyName.replace(/\s+/g, '-')}-page2.png`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove();
-      }, 'image/png');
+      // Download page 2
+      setTimeout(() => {
+        canvas2.toBlob((blob) => {
+          if (!blob) throw new Error('Failed to create blob for page 2');
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Package-${companyName.replace(/\s+/g, '-')}-page2.png`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          a.remove();
+        }, 'image/png');
+      }, 500);
 
       setIsGenerating(false);
     } catch (error) {
@@ -407,7 +417,11 @@ export default function AdminPackages() {
 
         {/* Hidden Quote Template for PNG generation */}
         {selectedPackage && (
-          <div className="fixed top-0 left-0 opacity-0 pointer-events-none overflow-hidden" style={{ zIndex: -1 }}>
+          <div 
+            id="quote-render-container"
+            className="fixed top-0 left-0 pointer-events-none overflow-visible" 
+            style={{ zIndex: -1, opacity: 0 }}
+          >
             <div ref={quoteRef}>
               <QuoteTemplate packageData={selectedPackage} />
             </div>
