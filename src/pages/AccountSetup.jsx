@@ -46,6 +46,7 @@ export default function AccountSetup() {
       // Notify admins about new user awaiting role assignment
       const admins = await base44.entities.User.filter({ role: 'admin' });
       for (const admin of admins) {
+        // Email notification
         await base44.integrations.Core.SendEmail({
           to: admin.email,
           subject: 'New User Awaiting Role Assignment',
@@ -58,6 +59,15 @@ export default function AccountSetup() {
             <br/>
             <p>Please log in to the admin portal to assign them a role (Client or Partner).</p>
           `
+        });
+
+        // In-app notification
+        await base44.entities.Notification.create({
+          user_id: admin.email,
+          title: 'New User Awaiting Role',
+          message: `${formData.display_name} (${user.email}) has completed account setup and needs a role assignment.`,
+          type: 'alert',
+          link: 'AdminSettings'
         });
       }
     },

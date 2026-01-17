@@ -22,12 +22,16 @@ import {
   LogOut,
   ChevronDown,
   Bell,
-  Search
+  Search,
+  Check,
+  ExternalLink
 } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -89,7 +93,18 @@ export default function Layout({ children, currentPageName }) {
     enabled: !!user?.email,
   });
 
+  const { data: notifications = [] } = useQuery({
+    queryKey: ['notifications', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return [];
+      return await base44.entities.Notification.filter({ user_id: user.email, read: false }, '-created_date', 50);
+    },
+    enabled: !!user?.email,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
   const unreadCount = unreadMessages.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+  const unreadNotificationsCount = notifications.length;
 
   // Determine user type based on role and entity data
   const getUserType = () => {
@@ -140,6 +155,19 @@ export default function Layout({ children, currentPageName }) {
     await base44.auth.logout();
   };
 
+  const markNotificationAsRead = async (notificationId) => {
+    await base44.entities.Notification.update(notificationId, { read: true });
+    queryClient.invalidateQueries(['notifications']);
+  };
+
+  const markAllAsRead = async () => {
+    for (const notification of notifications) {
+      await base44.entities.Notification.update(notification.id, { read: true });
+    }
+    queryClient.invalidateQueries(['notifications']);
+    setNotificationsOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0c10]">
       {/* Grid pattern background */}
@@ -179,12 +207,90 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             {/* Notifications */}
-            <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
-              <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-emerald-500 rounded-full" />
+            <div className="relative">
+              <button 
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                className="relative p-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 bg-red-500 rounded-full text-[10px] font-mono text-white">
+                    {unreadNotificationsCount}
+                  </span>
+                )}
+              </button>
+
+              {notificationsOpen && (
+                <div className="absolute right-0 mt-2 w-96 bg-[#12161D] border border-white/[0.08] rounded-sm shadow-xl max-h-[500px] overflow-hidden flex flex-col">
+                  <div className="flex items-center justify-between p-4 border-b border-white/[0.08]">
+                    <h3 className="text-sm font-medium text-white">Notifications</h3>
+                    {notifications.length > 0 && (
+                      <button
+                        onClick={markAllAsRead}
+                        className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                      >
+                        <Check className="w-3 h-3" />
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500">
+                        <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No new notifications</p>
+                      </div>
+                    ) : (
+                      notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className="p-4 border-b border-white/[0.08] hover:bg-white/[0.02] transition-colors"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={`w-2 h-2 rounded-full ${
+                                  notification.type === 'alert' ? 'bg-red-500' :
+                                  notification.type === 'warning' ? 'bg-amber-500' :
+                                  notification.type === 'success' ? 'bg-emerald-500' :
+                                  'bg-blue-500'
+                                }`} />
+                                <h4 className="text-sm font-medium text-white">{notification.title}</h4>
+                              </div>
+                              <p className="text-xs text-gray-400 mb-2">{notification.message}</p>
+                              <p className="text-[10px] text-gray-600">
+                                {new Date(notification.created_date).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="flex gap-1">
+                              {notification.link && (
+                                <Link
+                                  to={createPageUrl(notification.link)}
+                                  onClick={() => {
+                                    markNotificationAsRead(notification.id);
+                                    setNotificationsOpen(false);
+                                  }}
+                                  className="p-1 text-emerald-400 hover:text-emerald-300"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                </Link>
+                              )}
+                              <button
+                                onClick={() => markNotificationAsRead(notification.id)}
+                                className="p-1 text-gray-500 hover:text-white"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
 
             {/* User menu */}
             <div className="relative">
