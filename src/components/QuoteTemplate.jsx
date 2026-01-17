@@ -31,7 +31,7 @@ export default function QuoteTemplate({ packageData }) {
           <h1 className="text-5xl font-bold mb-4 tracking-tight" style={{ color: '#FFFFFF' }}>
             MAINERMEDIA
           </h1>
-          <h3 className="text-2xl font-medium mb-3" style={{ color: '#E5E7EB' }}>
+          <h3 className="text-2xl font-medium mb-3 tracking-wide" style={{ color: '#E5E7EB', letterSpacing: '0.1em' }}>
             Custom Engagement Package
           </h3>
           <div className="w-full h-0.5" style={{ backgroundColor: '#10b981', opacity: 0.6 }}></div>
