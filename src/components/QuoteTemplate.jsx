@@ -56,6 +56,11 @@ export default function QuoteTemplate({ packageData }) {
           <p className="text-xs mb-1" style={{ color: '#E5E7EB' }}>
             Contact: {packageData.contact_email}
           </p>
+          {packageData.contact_phone && (
+            <p className="text-xs mb-1" style={{ color: '#E5E7EB' }}>
+              Phone: {packageData.contact_phone}
+            </p>
+          )}
           <p className="text-[10px]" style={{ color: '#9CA3AF' }}>
             Generated: {genDate}
           </p>

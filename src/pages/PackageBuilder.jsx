@@ -19,6 +19,7 @@ export default function PackageBuilder() {
   const [formData, setFormData] = useState({
     company_name: '',
     contact_email: '',
+    contact_phone: '',
     audit_included: true,
     selected_option: '',
     company_scale: '',
@@ -206,6 +207,14 @@ export default function PackageBuilder() {
                 placeholder="contact@company.com"
                 required
               />
+              
+              <InputField
+                label="Contact Phone"
+                type="tel"
+                value={formData.contact_phone}
+                onChange={(e) => updateField('contact_phone', e.target.value)}
+                placeholder="+1 (555) 123-4567"
+              />
             </div>
           )}
 
@@ -371,6 +380,9 @@ export default function PackageBuilder() {
                   <div>
                     <p className="text-xs text-gray-500 uppercase font-mono tracking-wider">Contact</p>
                     <p className="text-white font-medium">{formData.contact_email}</p>
+                    {formData.contact_phone && (
+                      <p className="text-gray-400 text-sm mt-1">{formData.contact_phone}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 uppercase font-mono tracking-wider">Selected Option</p>
