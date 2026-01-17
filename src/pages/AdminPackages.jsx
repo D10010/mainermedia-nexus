@@ -273,16 +273,17 @@ export default function AdminPackages() {
                   variant="secondary"
                   size="small"
                   onClick={async () => {
-                    if (window.confirm(`Send this package quote to ${selectedPackage.contact_email}?`)) {
+                    if (window.confirm(`Mark this package as ready to send to ${selectedPackage.contact_email}?\n\nYou'll receive a notification with the full package details to send via your email system.`)) {
                       await sendPackageMutation.mutateAsync(selectedPackage.id);
                       updateStatusMutation.mutate({ id: selectedPackage.id, status: 'Sent' });
+                      setShowDetailsModal(false);
                     }
                   }}
                   disabled={selectedPackage.status === 'Sent' || sendPackageMutation.isPending || updateStatusMutation.isPending}
                   loading={sendPackageMutation.isPending || updateStatusMutation.isPending}
                   icon={Mail}
                 >
-                  {selectedPackage.status === 'Sent' ? 'Already Sent' : 'Send to Client'}
+                  {selectedPackage.status === 'Sent' ? 'Already Sent' : 'Prepare to Send'}
                 </PrimaryButton>
                 <PrimaryButton
                   variant="danger"
