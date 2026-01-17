@@ -93,7 +93,7 @@ export default function AdminPackages() {
   });
 
   const updatePackageMutation = useMutation({
-    mutationFn: (data) => base44.entities.Package.update(selectedPackage.id, {
+    mutationFn: ({ packageId, data }) => base44.entities.Package.update(packageId, {
       company_name: data.company_name,
       contact_email: data.contact_email,
       contact_phone: data.contact_phone,
