@@ -224,13 +224,24 @@ export default function Notifications() {
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 min-w-0">
+                  <div 
+                    className="flex-1 min-w-0 cursor-pointer"
+                    onClick={() => {
+                      if (notification.link && notification.metadata?.packageId) {
+                        navigate(createPageUrl(notification.link) + `?packageId=${notification.metadata.packageId}`);
+                        updateMutation.mutate({
+                          id: notification.id,
+                          data: { read: true }
+                        });
+                      }
+                    }}
+                  >
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <h3 className={`text-sm font-medium ${notification.read ? 'text-gray-400' : 'text-white'}`}>
                         {notification.title}
                       </h3>
                       <span className="text-xs text-gray-600 whitespace-nowrap">
-                        {new Date(notification.created_date).toLocaleDateString()} {new Date(notification.created_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(notification.created_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })} {new Date(notification.created_date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
                       </span>
                     </div>
                     <p className={`text-sm mb-3 ${notification.read ? 'text-gray-500' : 'text-gray-300'}`}>
@@ -239,14 +250,21 @@ export default function Notifications() {
 
                     {/* Actions */}
                     <div className="flex flex-wrap gap-2">
-                      {notification.link && (
-                        <Link
-                          to={createPageUrl(notification.link)}
+                      {notification.link && notification.metadata?.packageId && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(createPageUrl(notification.link) + `?packageId=${notification.metadata.packageId}`);
+                            updateMutation.mutate({
+                              id: notification.id,
+                              data: { read: true }
+                            });
+                          }}
                           className="inline-flex items-center gap-1 px-2.5 py-1 text-xs bg-emerald-500/20 text-emerald-400 rounded-sm hover:bg-emerald-500/30 transition-colors"
                         >
                           <ExternalLink className="w-3 h-3" />
-                          View Details
-                        </Link>
+                          Send Package
+                        </button>
                       )}
 
                       {/* Admin: Assign Role Button */}
