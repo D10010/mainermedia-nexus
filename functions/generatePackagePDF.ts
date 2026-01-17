@@ -24,66 +24,92 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Package not found' }, { status: 404 });
     }
 
-    // Create PDF (A4 size - 210mm x 297mm)
+    // Create PDF (A4 size - 595pt x 842pt in points)
     const doc = new jsPDF({ 
-      unit: 'mm',
+      unit: 'pt',
       format: 'a4'
     });
     
-    // Colors
+    const pageWidth = 595;
+    const pageHeight = 842;
+    const margin = 60;
+    
+    // Colors (RGB)
     const black = [0, 0, 0];
     const white = [255, 255, 255];
     const teal = [0, 255, 170]; // #00FFAA
     const darkGray = [26, 26, 26]; // #1A1A1A
     const lightGray = [170, 170, 170]; // #AAAAAA
     
-    // Helper to draw rounded rectangle
-    const drawRoundedBox = (x, y, w, h, r = 2) => {
+    // Helper to draw rounded rectangle with border
+    const drawRoundedBox = (x, y, w, h, r = 10) => {
       doc.setFillColor(...darkGray);
       doc.setDrawColor(...teal);
-      doc.setLineWidth(0.3);
+      doc.setLineWidth(2);
       doc.roundedRect(x, y, w, h, r, r, 'FD');
+    };
+    
+    // Helper to add footer
+    const addFooter = () => {
+      doc.setDrawColor(...teal);
+      doc.setLineWidth(1);
+      doc.line(margin, 800, pageWidth - margin, 800);
+      
+      doc.setFontSize(8);
+      doc.setTextColor(...lightGray);
+      doc.setFont('helvetica', 'normal');
+      const year = new Date().getFullYear();
+      doc.text(`\u00A9 ${year} MainerMedia Nexus. All rights reserved.`, pageWidth / 2, 815, { align: 'center' });
     };
     
     // ===== PAGE 1 =====
     
     // Black background
     doc.setFillColor(...black);
-    doc.rect(0, 0, 210, 297, 'F');
+    doc.rect(0, 0, pageWidth, pageHeight, 'F');
     
-    // MAINERMEDIA - centered at (105, 20)
+    // Header: MAINERMEDIA
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(48);
     doc.setTextColor(...white);
-    doc.text('MAINERMEDIA', 105, 30, { align: 'center' });
+    doc.text('MAINERMEDIA', pageWidth / 2, 80, { align: 'center' });
     
-    // NEXUS - centered at (105, 50)
+    // NEXUS
     doc.setFontSize(36);
     doc.setTextColor(...teal);
-    doc.text('NEXUS', 105, 50, { align: 'center' });
+    doc.text('NEXUS', pageWidth / 2, 120, { align: 'center' });
     
-    // Custom Engagement Package - centered at (105, 70)
+    // Custom Engagement Package
     doc.setFontSize(24);
     doc.setTextColor(...white);
     doc.setFont('helvetica', 'normal');
-    doc.text('Custom Engagement Package', 105, 68, { align: 'center' });
+    doc.text('Custom Engagement Package', pageWidth / 2, 150, { align: 'center' });
     
     // Horizontal divider
     doc.setDrawColor(...teal);
-    doc.setLineWidth(0.5);
-    doc.line(20, 78, 190, 78);
+    doc.setLineWidth(1);
+    doc.line(margin, 165, pageWidth - margin, 165);
     
-    // Company info box at (20, 90) - 170x40mm
-    drawRoundedBox(20, 85, 170, 35, 2);
+    // Introductory text block
+    doc.setFontSize(11);
+    doc.setTextColor(...white);
+    doc.setFont('helvetica', 'normal');
+    const introText = 'A catalyst for accelerated growth. We utilize a data-driven methodology to ensure every marketing dollar contributes to your bottom line, turning insights into revenue and market presence into sustainable competitive advantage.';
+    const introLines = doc.splitTextToSize(introText, pageWidth - margin * 2);
+    doc.text(introLines, margin, 185);
+    
+    // Company info box at (60, 210)
+    const companyBoxY = 210;
+    drawRoundedBox(margin, companyBoxY, pageWidth - margin * 2, 80, 10);
     
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.setTextColor(...white);
-    doc.text(`COMPANY: ${pkg.company_name}`, 25, 95);
+    doc.text(`COMPANY: ${pkg.company_name}`, margin + 10, companyBoxY + 20);
     
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
-    doc.text(`Contact: ${pkg.contact_email}`, 25, 105);
+    doc.text(`Contact: ${pkg.contact_email}`, margin + 10, companyBoxY + 40);
     
     doc.setTextColor(...lightGray);
     doc.setFontSize(10);
@@ -92,86 +118,96 @@ Deno.serve(async (req) => {
       month: 'long', 
       day: 'numeric' 
     });
-    doc.text(`Generated: ${genDate}`, 25, 113);
+    doc.text(`Generated: ${genDate}`, margin + 10, companyBoxY + 60);
     
-    // ENGAGEMENT DETAILS header at (20, 140)
+    // ENGAGEMENT DETAILS section
+    const engagementY = 315;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(18);
     doc.setTextColor(...teal);
-    doc.text('ENGAGEMENT DETAILS', 20, 135);
+    doc.text('ENGAGEMENT DETAILS', margin, engagementY);
     
     // Teal underline
     doc.setDrawColor(...teal);
-    doc.setLineWidth(0.6);
-    doc.line(20, 137, 100, 137);
+    doc.setLineWidth(2);
+    doc.line(margin, engagementY + 5, pageWidth - margin, engagementY + 5);
     
-    // Details box at (20, 140) - 170x80mm
+    // Details box
+    const detailsBoxY = engagementY + 15;
     const detailsBoxHeight = pkg.calculated_retainer > 0 ? 
-      (pkg.decision_deadline ? 50 : 42) : 35;
-    drawRoundedBox(20, 145, 170, detailsBoxHeight, 2);
+      (pkg.decision_deadline ? 130 : 110) : 90;
+    drawRoundedBox(margin, detailsBoxY, pageWidth - margin * 2, detailsBoxHeight, 10);
     
-    let detailY = 153;
+    let detailY = detailsBoxY + 25;
+    const labelX = margin + 15;
+    const valueX = margin + 180;
+    
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(...white);
-    doc.text('Selected Option:', 25, detailY);
+    doc.text('Selected Option:', labelX, detailY);
     doc.setFont('helvetica', 'bold');
-    doc.text(pkg.selected_option, 80, detailY);
+    doc.setFontSize(12);
+    doc.text(pkg.selected_option, valueX, detailY);
     
-    detailY += 8;
+    detailY += 22;
     doc.setFont('helvetica', 'normal');
-    doc.text('Audit Fee:', 25, detailY);
+    doc.setFontSize(11);
+    doc.text('Audit Fee:', labelX, detailY);
     doc.setTextColor(...teal);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
-    doc.text('$5,000', 80, detailY);
+    doc.text('$5,000', valueX, detailY);
     
     if (pkg.calculated_retainer > 0) {
-      detailY += 8;
+      detailY += 22;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(11);
       doc.setTextColor(...white);
-      doc.text('Monthly Retainer:', 25, detailY);
+      doc.text('Monthly Retainer:', labelX, detailY);
       doc.setTextColor(...teal);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
-      doc.text(`$${pkg.calculated_retainer.toLocaleString()}/month`, 80, detailY);
+      doc.text(`$${pkg.calculated_retainer.toLocaleString()}/month`, valueX, detailY);
       
-      detailY += 8;
+      detailY += 22;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(11);
       doc.setTextColor(...white);
-      doc.text('Probation Period:', 25, detailY);
+      doc.text('Probation Period:', labelX, detailY);
       doc.setFont('helvetica', 'bold');
-      doc.text(`${pkg.probation_months} months minimum`, 80, detailY);
+      doc.setFontSize(12);
+      doc.text(`${pkg.probation_months} months minimum`, valueX, detailY);
     }
     
     if (pkg.decision_deadline) {
-      detailY += 8;
+      detailY += 22;
       doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
       doc.setTextColor(...white);
-      doc.text('Decision Deadline:', 25, detailY);
+      doc.text('Decision Deadline:', labelX, detailY);
       doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
       const deadline = new Date(pkg.decision_deadline).toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
       });
-      doc.text(deadline, 80, detailY);
+      doc.text(deadline, valueX, detailY);
     }
     
     // COMPANY PROFILE section
-    const profileY = 145 + detailsBoxHeight + 15;
+    const profileY = detailsBoxY + detailsBoxHeight + 25;
     
     if (pkg.company_scale || pkg.annual_revenue || pkg.gross_profit_margin || pkg.growth_target) {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(18);
       doc.setTextColor(...teal);
-      doc.text('COMPANY PROFILE', 20, profileY);
+      doc.text('COMPANY PROFILE', margin, profileY);
       
       // Teal underline
-      doc.setLineWidth(0.6);
-      doc.line(20, profileY + 2, 95, profileY + 2);
+      doc.setLineWidth(2);
+      doc.line(margin, profileY + 5, pageWidth - margin, profileY + 5);
       
       const profileItems = [
         pkg.company_scale, 
@@ -179,78 +215,80 @@ Deno.serve(async (req) => {
         pkg.gross_profit_margin, 
         pkg.growth_target
       ].filter(Boolean).length;
-      const profileBoxHeight = 10 + (profileItems * 8);
+      const profileBoxHeight = 30 + (profileItems * 22);
+      const profileBoxY = profileY + 15;
       
-      drawRoundedBox(20, profileY + 8, 170, profileBoxHeight, 2);
+      drawRoundedBox(margin, profileBoxY, pageWidth - margin * 2, profileBoxHeight, 10);
       
-      let profileDetailY = profileY + 16;
+      let profileDetailY = profileBoxY + 25;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(11);
       doc.setTextColor(...white);
       
       if (pkg.company_scale) {
-        doc.text('Company Scale:', 25, profileDetailY);
+        doc.text('Company Scale:', labelX, profileDetailY);
         doc.setFont('helvetica', 'bold');
-        doc.text(pkg.company_scale, 80, profileDetailY);
+        doc.setFontSize(12);
+        doc.text(pkg.company_scale, valueX, profileDetailY);
         doc.setFont('helvetica', 'normal');
-        profileDetailY += 8;
+        doc.setFontSize(11);
+        profileDetailY += 22;
       }
       
       if (pkg.annual_revenue) {
-        doc.text('Annual Revenue:', 25, profileDetailY);
+        doc.text('Annual Revenue:', labelX, profileDetailY);
         doc.setFont('helvetica', 'bold');
-        doc.text(`$${parseFloat(pkg.annual_revenue).toLocaleString()}`, 80, profileDetailY);
+        doc.setFontSize(12);
+        doc.text(`$${parseFloat(pkg.annual_revenue).toLocaleString()}`, valueX, profileDetailY);
         doc.setFont('helvetica', 'normal');
-        profileDetailY += 8;
+        doc.setFontSize(11);
+        profileDetailY += 22;
       }
       
       if (pkg.gross_profit_margin) {
-        doc.text('Profit Margin:', 25, profileDetailY);
+        doc.text('Profit Margin:', labelX, profileDetailY);
         doc.setFont('helvetica', 'bold');
-        doc.text(`${pkg.gross_profit_margin}%`, 80, profileDetailY);
+        doc.setFontSize(12);
+        doc.text(`${pkg.gross_profit_margin}%`, valueX, profileDetailY);
         doc.setFont('helvetica', 'normal');
-        profileDetailY += 8;
+        doc.setFontSize(11);
+        profileDetailY += 22;
       }
       
       if (pkg.growth_target) {
-        doc.text('Growth Target:', 25, profileDetailY);
+        doc.text('Growth Target:', labelX, profileDetailY);
         doc.setFont('helvetica', 'bold');
-        doc.text(pkg.growth_target, 80, profileDetailY);
+        doc.setFontSize(12);
+        doc.text(pkg.growth_target, valueX, profileDetailY);
       }
     }
     
     // Footer for page 1
-    doc.setDrawColor(...teal);
-    doc.setLineWidth(0.5);
-    doc.line(20, 280, 190, 280);
-    
-    doc.setFontSize(8);
-    doc.setTextColor(...lightGray);
-    doc.setFont('helvetica', 'normal');
-    const year = new Date().getFullYear();
-    doc.text(`\u00A9 ${year} MainerMedia Nexus. All rights reserved.`, 105, 285, { align: 'center' });
+    addFooter();
     
     // ===== PAGE 2 =====
     doc.addPage();
     doc.setFillColor(...black);
-    doc.rect(0, 0, 210, 297, 'F');
+    doc.rect(0, 0, pageWidth, pageHeight, 'F');
     
-    // ENGAGEMENT TERMS header at (20, 20)
+    // ENGAGEMENT TERMS section
+    const termsY = 60;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(18);
     doc.setTextColor(...teal);
-    doc.text('ENGAGEMENT TERMS', 20, 25);
+    doc.text('ENGAGEMENT TERMS', margin, termsY);
     
     // Teal underline
-    doc.setLineWidth(0.6);
-    doc.line(20, 27, 90, 27);
+    doc.setLineWidth(2);
+    doc.line(margin, termsY + 5, pageWidth - margin, termsY + 5);
     
     // Terms box
     if (pkg.selected_option !== 'Option 1 - Independent') {
-      const termsBoxHeight = 58;
-      drawRoundedBox(20, 35, 170, termsBoxHeight, 2);
+      const termsBoxY = termsY + 15;
+      const termsBoxHeight = 140;
+      drawRoundedBox(margin, termsBoxY, pageWidth - margin * 2, termsBoxHeight, 10);
       
-      let termsY = 43;
+      let termY = termsBoxY + 20;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(...white);
@@ -265,75 +303,64 @@ Deno.serve(async (req) => {
       terms.forEach((term) => {
         doc.setTextColor(...teal);
         doc.setFont('helvetica', 'bold');
-        doc.text('>', 25, termsY);
+        doc.text('>', margin + 15, termY);
         doc.setTextColor(...white);
         doc.setFont('helvetica', 'normal');
-        const lines = doc.splitTextToSize(term, 158);
-        doc.text(lines, 30, termsY);
-        termsY += (lines.length * 4) + 3;
+        const lines = doc.splitTextToSize(term, pageWidth - margin * 2 - 40);
+        doc.text(lines, margin + 25, termY);
+        termY += (lines.length * 12) + 8;
       });
     }
     
     // ADDITIONAL NOTES section
-    let notesY = 105;
+    const notesY = 230;
     if (pkg.notes) {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(18);
       doc.setTextColor(...teal);
-      doc.text('ADDITIONAL NOTES', 20, notesY);
+      doc.text('ADDITIONAL NOTES', margin, notesY);
       
       // Teal underline
-      doc.setLineWidth(0.6);
-      doc.line(20, notesY + 2, 90, notesY + 2);
+      doc.setLineWidth(2);
+      doc.line(margin, notesY + 5, pageWidth - margin, notesY + 5);
       
-      const splitNotes = doc.splitTextToSize(pkg.notes, 160);
-      const notesBoxHeight = 10 + (splitNotes.length * 5);
+      const splitNotes = doc.splitTextToSize(pkg.notes, pageWidth - margin * 2 - 30);
+      const notesBoxHeight = Math.max(50, 30 + (splitNotes.length * 12));
+      const notesBoxY = notesY + 15;
       
-      drawRoundedBox(20, notesY + 8, 170, notesBoxHeight, 2);
+      drawRoundedBox(margin, notesBoxY, pageWidth - margin * 2, notesBoxHeight, 10);
       
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(...white);
-      doc.text(splitNotes, 25, notesY + 15);
-      
-      notesY += notesBoxHeight + 8 + 15;
+      doc.text(splitNotes, margin + 15, notesBoxY + 20);
     }
     
-    // Call to Action at (20, 180)
+    // Call to Action section
+    const ctaY = pkg.notes ? 330 : 270;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(12);
     doc.setTextColor(...white);
     const ctaText = 'Ready to begin? Let us schedule your initial discovery call to discuss the Audit process.';
-    const ctaLines = doc.splitTextToSize(ctaText, 170);
-    doc.text(ctaLines, 105, notesY, { align: 'center' });
+    const ctaLines = doc.splitTextToSize(ctaText, pageWidth - margin * 2);
+    doc.text(ctaLines, pageWidth / 2, ctaY, { align: 'center' });
     
-    notesY += (ctaLines.length * 6) + 10;
-    
-    // MAINERMEDIA - centered at (105, 200)
+    // MAINERMEDIA
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.text('MAINERMEDIA', 105, notesY, { align: 'center' });
+    doc.setFontSize(24);
+    doc.text('MAINERMEDIA', pageWidth / 2, ctaY + 50, { align: 'center' });
     
-    notesY += 10;
-    
-    // Contact info - centered at (105, 215)
+    // Contact info
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
+    doc.setFontSize(12);
     doc.setTextColor(...teal);
-    doc.text('Contact us at mainermedia.com', 105, notesY, { align: 'center' });
+    doc.text('Contact us at mainermedia.com', pageWidth / 2, ctaY + 75, { align: 'center' });
     
-    notesY += 8;
-    doc.text('Book a Call \u2192', 105, notesY, { align: 'center' });
+    // Book a Call with proper arrow character
+    doc.text('Book a Call \u2192', pageWidth / 2, ctaY + 95, { align: 'center' });
     
     // Footer for page 2
-    doc.setDrawColor(...teal);
-    doc.setLineWidth(0.5);
-    doc.line(20, 280, 190, 280);
-    
-    doc.setFontSize(8);
-    doc.setTextColor(...lightGray);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`\u00A9 ${year} MainerMedia Nexus. All rights reserved.`, 105, 285, { align: 'center' });
+    addFooter();
 
     // Generate PDF buffer
     const pdfBytes = doc.output('arraybuffer');
