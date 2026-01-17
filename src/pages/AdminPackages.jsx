@@ -66,42 +66,47 @@ export default function AdminPackages() {
     try {
       setIsGenerating(true);
       
-      // Wait longer for render
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait for DOM to render
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       if (!quoteRef.current) {
         console.error('Quote template ref not found');
         throw new Error('Quote template not found');
       }
 
-      const pages = quoteRef.current.children;
+      // Get the template wrapper div
+      const templateWrapper = quoteRef.current.querySelector('.quote-template-wrapper');
+      if (!templateWrapper) {
+        console.error('Template wrapper not found');
+        throw new Error('Template wrapper not found');
+      }
+
+      const pages = templateWrapper.children;
       if (!pages || pages.length < 2) {
-        console.error('Pages not found in template');
+        console.error('Pages not found in template, found:', pages ? pages.length : 0);
         throw new Error('Pages not found');
       }
 
       // Capture page 1
       const page1Element = pages[0];
+      console.log('Capturing page 1...', page1Element);
       const canvas1 = await html2canvas(page1Element, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#000000',
         logging: false,
-        width: 1190,
-        height: 1684,
       });
       
       // Capture page 2
       const page2Element = pages[1];
+      console.log('Capturing page 2...', page2Element);
       const canvas2 = await html2canvas(page2Element, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#000000',
         logging: false,
-        width: 1190,
-        height: 1684,
       });
 
       // Download page 1
@@ -401,11 +406,13 @@ export default function AdminPackages() {
         )}
 
         {/* Hidden Quote Template for PNG generation */}
-        <div className="fixed top-0 left-0 opacity-0 pointer-events-none overflow-hidden" style={{ zIndex: -1 }}>
-          <div ref={quoteRef}>
-            {selectedPackage && <QuoteTemplate packageData={selectedPackage} />}
+        {selectedPackage && (
+          <div className="fixed top-0 left-0 opacity-0 pointer-events-none overflow-hidden" style={{ zIndex: -1 }}>
+            <div ref={quoteRef}>
+              <QuoteTemplate packageData={selectedPackage} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </RoleGuard>
   );

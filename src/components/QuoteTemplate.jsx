@@ -10,7 +10,7 @@ export default function QuoteTemplate({ packageData }) {
   const year = new Date().getFullYear();
 
   return (
-    <div className="w-[1190px] bg-black text-white font-sans">
+    <div className="quote-template-wrapper w-[1190px] bg-black text-white font-sans">
       {/* Page 1 */}
       <div className="w-full h-[1684px] bg-black p-16 flex flex-col">
         {/* Header */}
