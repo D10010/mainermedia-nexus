@@ -8,6 +8,7 @@ import PrimaryButton from '../components/ui/PrimaryButton';
 import InputField from '../components/ui/InputField';
 import SelectField from '../components/ui/SelectField';
 import { CheckCircle, ArrowRight, ArrowLeft, Package, DollarSign, Building2, Target, FileText } from 'lucide-react';
+import { createPageUrl } from '../utils';
 
 const STEPS = ['Audit & Company Info', 'Engagement Option', 'Pricing Inputs', 'Terms & Summary'];
 
