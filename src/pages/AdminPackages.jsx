@@ -19,6 +19,7 @@ export default function AdminPackages() {
     const queryClient = useQueryClient();
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const quoteRef = useRef(null);
 
