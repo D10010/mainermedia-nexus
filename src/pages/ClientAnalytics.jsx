@@ -328,6 +328,8 @@ export default function ClientAnalytics() {
                   healthStatus={latestMetric?.health_status}
                   healthScore={latestMetric?.health_score}
                   accountUrl={account.account_url}
+                  accountId={account.id}
+                  lastSync={account.last_sync}
                 />
               );
             })}

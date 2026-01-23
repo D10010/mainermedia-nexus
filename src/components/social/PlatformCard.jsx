@@ -1,6 +1,9 @@
 import React from 'react';
-import { ExternalLink, TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react';
+import { ExternalLink, TrendingUp, TrendingDown, Minus, AlertCircle, RefreshCw } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
+import PrimaryButton from '../ui/PrimaryButton';
+import { base44 } from '@/api/base44Client';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const PLATFORM_COLORS = {
   Instagram: '#E4405F',
@@ -26,9 +29,24 @@ export default function PlatformCard({
   insight,
   healthStatus,
   healthScore,
-  accountUrl 
+  accountUrl,
+  accountId,
+  lastSync
 }) {
+  const queryClient = useQueryClient();
   const platformColor = PLATFORM_COLORS[platform] || '#10b981';
+
+  const syncMetricsMutation = useMutation({
+    mutationFn: async () => {
+      const functionName = `sync${platform}Metrics`;
+      const response = await base44.functions.invoke(functionName, { accountId });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['socialMetrics']);
+      queryClient.invalidateQueries(['socialAccounts']);
+    },
+  });
 
   const getTrendIcon = (value) => {
     if (!value || value === 0) return <Minus className="w-3 h-3 text-gray-500" />;
@@ -100,6 +118,25 @@ export default function PlatformCard({
         )}
       </div>
 
+      {/* Last Sync */}
+      {lastSync && (
+        <div className="px-4 py-2 border-b border-white/[0.08] flex items-center justify-between">
+          <span className="text-[10px] text-gray-500">
+            Last synced: {new Date(lastSync).toLocaleString()}
+          </span>
+          <PrimaryButton
+            variant="ghost"
+            size="small"
+            icon={RefreshCw}
+            onClick={() => syncMetricsMutation.mutate()}
+            loading={syncMetricsMutation.isPending}
+            disabled={syncMetricsMutation.isPending}
+          >
+            Sync Now
+          </PrimaryButton>
+        </div>
+      )}
+
       {/* Metrics Grid or Empty State */}
       {metrics ? (
         <div className="p-4 grid grid-cols-2 gap-4">
@@ -161,10 +198,20 @@ export default function PlatformCard({
       ) : (
         <div className="p-8 text-center">
           <AlertCircle className="w-8 h-8 text-gray-600 mx-auto mb-3" />
-          <p className="text-sm text-gray-500 mb-1">No metrics data yet</p>
-          <p className="text-xs text-gray-600">
-            Metrics will appear once data is synced for this platform
+          <p className="text-sm text-gray-500 mb-2">No metrics data yet</p>
+          <p className="text-xs text-gray-600 mb-4">
+            Click "Sync Now" to fetch the latest metrics from {platform}
           </p>
+          <PrimaryButton
+            variant="primary"
+            size="small"
+            icon={RefreshCw}
+            onClick={() => syncMetricsMutation.mutate()}
+            loading={syncMetricsMutation.isPending}
+            disabled={syncMetricsMutation.isPending}
+          >
+            Sync Metrics
+          </PrimaryButton>
         </div>
       )}
 
