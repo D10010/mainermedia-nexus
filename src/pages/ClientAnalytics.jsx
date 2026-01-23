@@ -22,11 +22,18 @@ import {
   Users,
   Activity,
   Download,
-  Calendar
+  Calendar,
+  Plus,
+  Target,
+  MousePointer
 } from 'lucide-react';
+import RoleGuard from '../components/RoleGuard';
 import Panel from '@/components/ui/Panel';
 import MetricCard from '@/components/ui/MetricCard';
 import PrimaryButton from '@/components/ui/PrimaryButton';
+import SocialMetricCard from '../components/social/SocialMetricCard';
+import PlatformCard from '../components/social/PlatformCard';
+import ConnectAccountModal from '../components/social/ConnectAccountModal';
 
 const PLATFORM_COLORS = {
   Instagram: '#E4405F',
@@ -42,6 +49,7 @@ const PLATFORM_COLORS = {
 export default function ClientAnalytics() {
   const [dateRange, setDateRange] = useState('30d');
   const [selectedPlatform, setSelectedPlatform] = useState('All');
+  const [showConnectModal, setShowConnectModal] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -56,6 +64,18 @@ export default function ClientAnalytics() {
       return clients[0] || null;
     },
     enabled: !!user?.email,
+  });
+
+  const { data: socialAccounts = [] } = useQuery({
+    queryKey: ['socialAccounts', client?.id],
+    queryFn: () => base44.entities.SocialMediaAccount.filter({ client_id: client.id }),
+    enabled: !!client?.id,
+  });
+
+  const { data: socialMetrics = [] } = useQuery({
+    queryKey: ['socialMetrics', client?.id],
+    queryFn: () => base44.entities.SocialMetric.filter({ client_id: client.id }, '-date', 90),
+    enabled: !!client?.id,
   });
 
   const { data: kpiMetrics = [] } = useQuery({
@@ -138,15 +158,77 @@ export default function ClientAnalytics() {
 
   const platforms = ['All', 'Instagram', 'YouTube', 'TikTok', 'Facebook', 'Website', 'LinkedIn'];
 
+  // Calculate aggregated social metrics
+  const getAggregatedMetrics = () => {
+    const cutoff = subDays(new Date(), getDaysAgo());
+    const recentMetrics = socialMetrics.filter(m => new Date(m.date) >= cutoff);
+    
+    if (recentMetrics.length === 0) return null;
+
+    const totalReach = recentMetrics.reduce((sum, m) => sum + (m.reach || 0), 0);
+    const avgEngagement = recentMetrics.reduce((sum, m) => sum + (m.engagement_rate || 0), 0) / recentMetrics.length;
+    const totalNetFollowers = recentMetrics.reduce((sum, m) => sum + (m.net_follower_change || 0), 0);
+    const totalClicks = recentMetrics.reduce((sum, m) => sum + (m.link_clicks || 0), 0);
+
+    return {
+      reach: totalReach,
+      engagementRate: avgEngagement,
+      netFollowerChange: totalNetFollowers,
+      linkClicks: totalClicks,
+    };
+  };
+
+  // Get platform-specific metrics
+  const getPlatformMetrics = (platform) => {
+    const cutoff = subDays(new Date(), getDaysAgo());
+    const platformMetrics = socialMetrics.filter(m => 
+      m.platform === platform && new Date(m.date) >= cutoff
+    );
+
+    if (platformMetrics.length === 0) return null;
+
+    const latest = platformMetrics[0];
+    const previous = platformMetrics[Math.floor(platformMetrics.length / 2)] || platformMetrics[0];
+
+    const calculateChange = (current, prev) => {
+      if (!prev || prev === 0) return 0;
+      return ((current - prev) / prev * 100).toFixed(1);
+    };
+
+    return {
+      reach: latest.reach || 0,
+      reachChange: calculateChange(latest.reach, previous.reach),
+      engagementRate: latest.engagement_rate || 0,
+      engagementChange: calculateChange(latest.engagement_rate, previous.engagement_rate),
+      netFollowerChange: latest.net_follower_change || 0,
+      followerGrowthRate: latest.followers_gained && latest.followers_lost 
+        ? ((latest.followers_gained - latest.followers_lost) / (latest.followers_gained + latest.followers_lost) * 100)
+        : 0,
+      linkClicks: latest.link_clicks || 0,
+      clicksChange: calculateChange(latest.link_clicks, previous.link_clicks),
+    };
+  };
+
+  const aggregatedMetrics = getAggregatedMetrics();
+
   return (
+    <RoleGuard allowedRoles={['client']}>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-light text-white tracking-tight">Analytics</h1>
-          <p className="text-gray-500 mt-1">Track your campaign performance across all platforms</p>
+          <h1 className="text-3xl font-light text-white tracking-tight">Social Media Analytics</h1>
+          <p className="text-gray-500 mt-1">Track momentum, attention quality, and business impact across platforms</p>
         </div>
         <div className="flex items-center gap-3">
+          <PrimaryButton 
+            variant="primary" 
+            icon={Plus} 
+            size="small"
+            onClick={() => setShowConnectModal(true)}
+          >
+            Connect Account
+          </PrimaryButton>
           <PrimaryButton variant="secondary" icon={Download} size="small">
             Export Report
           </PrimaryButton>
@@ -200,34 +282,80 @@ export default function ClientAnalytics() {
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          label="Total Views"
-          value={formatNumber(viewsKPI.metric_value)}
-          trend={viewsKPI.trend}
-          icon={Eye}
-          accent
-        />
-        <MetricCard
-          label="Engagement Rate"
-          value={`${engagementKPI.metric_value?.toFixed(2) || 0}%`}
-          trend={engagementKPI.trend}
-          icon={Activity}
-        />
-        <MetricCard
-          label="Follower Growth"
-          value={formatNumber(followersKPI.metric_value)}
-          trend={followersKPI.trend}
-          icon={Users}
-        />
-        <MetricCard
-          label="Clicks"
-          value={formatNumber(clicksKPI.metric_value)}
-          trend={clicksKPI.trend}
-          icon={TrendingUp}
-        />
-      </div>
+      {/* Tier 1: Universal Metrics */}
+      {aggregatedMetrics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <SocialMetricCard
+            label="Reach (Unique Accounts)"
+            value={formatNumber(aggregatedMetrics.reach)}
+            icon={Eye}
+            accent
+          />
+          <SocialMetricCard
+            label="Engagement Rate"
+            value={`${aggregatedMetrics.engagementRate?.toFixed(1) || 0}%`}
+            icon={Activity}
+          />
+          <SocialMetricCard
+            label="Follower Velocity"
+            value={formatNumber(aggregatedMetrics.netFollowerChange)}
+            icon={Users}
+          />
+          <SocialMetricCard
+            label="Link Clicks / Actions"
+            value={formatNumber(aggregatedMetrics.linkClicks)}
+            icon={MousePointer}
+          />
+        </div>
+      )}
+
+      {/* Connected Platforms */}
+      {socialAccounts.length > 0 && (
+        <Panel title="Platform Performance" subtitle="Week-over-week signals" statusIndicator="Live">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {socialAccounts.map((account) => {
+              const metrics = getPlatformMetrics(account.platform);
+              const latestMetric = socialMetrics.find(m => 
+                m.platform === account.platform && m.account_id === account.id
+              );
+              
+              return (
+                <PlatformCard
+                  key={account.id}
+                  platform={account.platform}
+                  metrics={metrics}
+                  insight={latestMetric?.insight_text}
+                  healthStatus={latestMetric?.health_status}
+                  healthScore={latestMetric?.health_score}
+                  accountUrl={account.account_url}
+                />
+              );
+            })}
+          </div>
+        </Panel>
+      )}
+
+      {/* Empty state if no accounts */}
+      {socialAccounts.length === 0 && (
+        <Panel title="Get Started">
+          <div className="text-center py-12">
+            <div className="w-16 h-16 rounded-sm bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
+              <Target className="w-8 h-8 text-emerald-500" />
+            </div>
+            <h3 className="text-white text-lg font-medium mb-2">Connect Your Social Media Accounts</h3>
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
+              Start tracking momentum, attention quality, and business impact across all your platforms in one unified dashboard.
+            </p>
+            <PrimaryButton 
+              variant="primary" 
+              icon={Plus}
+              onClick={() => setShowConnectModal(true)}
+            >
+              Connect First Account
+            </PrimaryButton>
+          </div>
+        </Panel>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Views Over Time */}
@@ -377,6 +505,14 @@ export default function ClientAnalytics() {
           )}
         </div>
       </Panel>
+
+      {/* Connect Account Modal */}
+      <ConnectAccountModal
+        isOpen={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+        clientId={client?.id}
+      />
     </div>
+    </RoleGuard>
   );
 }
