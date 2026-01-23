@@ -100,63 +100,73 @@ export default function PlatformCard({
         )}
       </div>
 
-      {/* Metrics Grid */}
-      <div className="p-4 grid grid-cols-2 gap-4">
-        {/* Reach */}
-        <div>
-          <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Reach</p>
-          <p className="text-lg font-light text-white">{formatNumber(metrics?.reach)}</p>
-          {metrics?.reachChange !== undefined && (
-            <div className="flex items-center gap-1 mt-1">
-              {getTrendIcon(metrics.reachChange)}
-              <span className={`text-xs font-mono ${metrics.reachChange > 0 ? 'text-emerald-500' : metrics.reachChange < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                {metrics.reachChange > 0 ? '+' : ''}{metrics.reachChange}%
-              </span>
-            </div>
-          )}
-        </div>
+      {/* Metrics Grid or Empty State */}
+      {metrics ? (
+        <div className="p-4 grid grid-cols-2 gap-4">
+          {/* Reach */}
+          <div>
+            <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Reach</p>
+            <p className="text-lg font-light text-white">{formatNumber(metrics.reach)}</p>
+            {metrics.reachChange !== undefined && metrics.reachChange !== 0 && (
+              <div className="flex items-center gap-1 mt-1">
+                {getTrendIcon(metrics.reachChange)}
+                <span className={`text-xs font-mono ${metrics.reachChange > 0 ? 'text-emerald-500' : metrics.reachChange < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                  {metrics.reachChange > 0 ? '+' : ''}{metrics.reachChange}%
+                </span>
+              </div>
+            )}
+          </div>
 
-        {/* Engagement Rate */}
-        <div>
-          <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Engagement</p>
-          <p className="text-lg font-light text-white">{metrics?.engagementRate?.toFixed(1) || 0}%</p>
-          {metrics?.engagementChange !== undefined && (
-            <div className="flex items-center gap-1 mt-1">
-              {getTrendIcon(metrics.engagementChange)}
-              <span className={`text-xs font-mono ${metrics.engagementChange > 0 ? 'text-emerald-500' : metrics.engagementChange < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                {metrics.engagementChange > 0 ? '+' : ''}{metrics.engagementChange}%
-              </span>
-            </div>
-          )}
-        </div>
+          {/* Engagement Rate */}
+          <div>
+            <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Engagement</p>
+            <p className="text-lg font-light text-white">{metrics.engagementRate?.toFixed(1) || 0}%</p>
+            {metrics.engagementChange !== undefined && metrics.engagementChange !== 0 && (
+              <div className="flex items-center gap-1 mt-1">
+                {getTrendIcon(metrics.engagementChange)}
+                <span className={`text-xs font-mono ${metrics.engagementChange > 0 ? 'text-emerald-500' : metrics.engagementChange < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                  {metrics.engagementChange > 0 ? '+' : ''}{metrics.engagementChange}%
+                </span>
+              </div>
+            )}
+          </div>
 
-        {/* Follower Net Change */}
-        <div>
-          <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Follower Velocity</p>
-          <p className={`text-lg font-light ${metrics?.netFollowerChange > 0 ? 'text-emerald-500' : metrics?.netFollowerChange < 0 ? 'text-red-500' : 'text-white'}`}>
-            {metrics?.netFollowerChange > 0 ? '+' : ''}{formatNumber(metrics?.netFollowerChange)}
-          </p>
-          {metrics?.followerGrowthRate !== undefined && (
-            <p className="text-xs text-gray-500 mt-1">
-              {metrics.followerGrowthRate > 0 ? '+' : ''}{metrics.followerGrowthRate?.toFixed(1)}% growth rate
+          {/* Follower Net Change */}
+          <div>
+            <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Follower Velocity</p>
+            <p className={`text-lg font-light ${metrics.netFollowerChange > 0 ? 'text-emerald-500' : metrics.netFollowerChange < 0 ? 'text-red-500' : 'text-white'}`}>
+              {metrics.netFollowerChange > 0 ? '+' : ''}{formatNumber(metrics.netFollowerChange)}
             </p>
-          )}
-        </div>
+            {metrics.followerGrowthRate !== undefined && metrics.followerGrowthRate !== 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                {metrics.followerGrowthRate > 0 ? '+' : ''}{metrics.followerGrowthRate?.toFixed(1)}% growth rate
+              </p>
+            )}
+          </div>
 
-        {/* Link Clicks */}
-        <div>
-          <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Link Clicks</p>
-          <p className="text-lg font-light text-white">{formatNumber(metrics?.linkClicks)}</p>
-          {metrics?.clicksChange !== undefined && (
-            <div className="flex items-center gap-1 mt-1">
-              {getTrendIcon(metrics.clicksChange)}
-              <span className={`text-xs font-mono ${metrics.clicksChange > 0 ? 'text-emerald-500' : metrics.clicksChange < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                {metrics.clicksChange > 0 ? '+' : ''}{metrics.clicksChange}%
-              </span>
-            </div>
-          )}
+          {/* Link Clicks */}
+          <div>
+            <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Link Clicks</p>
+            <p className="text-lg font-light text-white">{formatNumber(metrics.linkClicks)}</p>
+            {metrics.clicksChange !== undefined && metrics.clicksChange !== 0 && (
+              <div className="flex items-center gap-1 mt-1">
+                {getTrendIcon(metrics.clicksChange)}
+                <span className={`text-xs font-mono ${metrics.clicksChange > 0 ? 'text-emerald-500' : metrics.clicksChange < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                  {metrics.clicksChange > 0 ? '+' : ''}{metrics.clicksChange}%
+                </span>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="p-8 text-center">
+          <AlertCircle className="w-8 h-8 text-gray-600 mx-auto mb-3" />
+          <p className="text-sm text-gray-500 mb-1">No metrics data yet</p>
+          <p className="text-xs text-gray-600">
+            Metrics will appear once data is synced for this platform
+          </p>
+        </div>
+      )}
 
       {/* Insight */}
       {insight && (
