@@ -63,10 +63,10 @@ export default function PlatformCard({
   };
 
   return (
-    <div className="bg-[#12161D] border border-white/[0.08] rounded-sm overflow-hidden hover:border-emerald-500/20 transition-colors">
+    <div className="bg-white dark:bg-[#12161D] border border-gray-200 dark:border-white/[0.08] rounded-sm overflow-hidden hover:border-emerald-500/20 transition-colors">
       {/* Header */}
       <div 
-        className="p-4 border-b border-white/[0.08] flex items-center justify-between"
+        className="p-4 border-b border-gray-200 dark:border-white/[0.08] flex items-center justify-between"
         style={{ 
           background: `linear-gradient(135deg, ${platformColor}15 0%, transparent 100%)` 
         }}
@@ -86,13 +86,13 @@ export default function PlatformCard({
             />
           </div>
           <div>
-            <h3 className="text-white font-medium">{platform}</h3>
+            <h3 className="text-gray-900 dark:text-white font-medium">{platform}</h3>
             {accountUrl && (
               <a 
                 href={accountUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-gray-500 hover:text-emerald-500 flex items-center gap-1"
+                className="text-xs text-gray-600 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-500 flex items-center gap-1"
               >
                 View profile <ExternalLink className="w-3 h-3" />
               </a>
@@ -103,14 +103,14 @@ export default function PlatformCard({
           <div className="flex items-center gap-2">
             <span className={`
               text-[10px] font-mono uppercase px-2 py-1 rounded-sm
-              ${healthStatus === 'Growing' ? 'bg-emerald-500/20 text-emerald-500' : ''}
-              ${healthStatus === 'Stable' ? 'bg-blue-500/20 text-blue-500' : ''}
-              ${healthStatus === 'Needs Attention' ? 'bg-amber-500/20 text-amber-500' : ''}
+              ${healthStatus === 'Growing' ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-500' : ''}
+              ${healthStatus === 'Stable' ? 'bg-blue-500/20 text-blue-600 dark:text-blue-500' : ''}
+              ${healthStatus === 'Needs Attention' ? 'bg-amber-500/20 text-amber-600 dark:text-amber-500' : ''}
             `}>
               {healthStatus}
             </span>
             {healthScore !== undefined && (
-              <span className="text-sm font-mono text-gray-500">
+              <span className="text-sm font-mono text-gray-600 dark:text-gray-500">
                 {healthScore}/100
               </span>
             )}
@@ -120,8 +120,8 @@ export default function PlatformCard({
 
       {/* Last Sync */}
       {lastSync && (
-        <div className="px-4 py-2 border-b border-white/[0.08] flex items-center justify-between">
-          <span className="text-[10px] text-gray-500">
+        <div className="px-4 py-2 border-b border-gray-200 dark:border-white/[0.08] flex items-center justify-between">
+          <span className="text-[10px] text-gray-600 dark:text-gray-500">
             Last synced: {new Date(lastSync).toLocaleString()}
           </span>
           <PrimaryButton
@@ -218,8 +218,8 @@ export default function PlatformCard({
       {/* Insight */}
       {insight && (
         <div className="px-4 pb-4">
-          <div className="bg-[#0E1116] border border-emerald-500/20 rounded-sm p-3">
-            <p className="text-xs text-gray-400 leading-relaxed">
+          <div className="bg-gray-50 dark:bg-[#0E1116] border border-emerald-500/20 rounded-sm p-3">
+            <p className="text-xs text-gray-700 dark:text-gray-400 leading-relaxed">
               {insight}
             </p>
           </div>
