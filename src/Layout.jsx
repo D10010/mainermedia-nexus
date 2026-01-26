@@ -24,15 +24,31 @@ import {
   Bell,
   Search,
   Check,
-  ExternalLink
+  ExternalLink,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [theme, setTheme] = useState('dark');
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+  };
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -174,24 +190,24 @@ export default function Layout({ children, currentPageName }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0c10]">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0c10] transition-colors">
       {/* Grid pattern background */}
       <div 
-        className="fixed inset-0 opacity-[0.02] pointer-events-none"
+        className="fixed inset-0 opacity-[0.02] dark:opacity-[0.02] pointer-events-none"
         style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(rgba(100,116,139,0.1) 1px, transparent 1px),
+                           linear-gradient(90deg, rgba(100,116,139,0.1) 1px, transparent 1px)`,
           backgroundSize: '40px 40px'
         }}
       />
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-[#0E1116]/80 backdrop-blur-xl border-b border-white/[0.08]">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-[#0E1116]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/[0.08] transition-colors">
         <div className="flex items-center justify-between h-16 px-4 lg:px-6">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 text-gray-400 hover:text-white"
+              className="lg:hidden p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -202,20 +218,29 @@ export default function Layout({ children, currentPageName }) {
 
           <div className="flex items-center gap-2">
             {/* Search */}
-            <div className="hidden md:flex items-center bg-[#12161D] border border-white/[0.08] rounded-sm px-3 py-2">
-              <Search className="w-4 h-4 text-gray-500" />
+            <div className="hidden md:flex items-center bg-gray-100 dark:bg-[#12161D] border border-gray-300 dark:border-white/[0.08] rounded-sm px-3 py-2 transition-colors">
+              <Search className="w-4 h-4 text-gray-500 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder="Search..."
-                className="bg-transparent border-none outline-none text-sm text-gray-300 placeholder:text-gray-600 ml-2 w-48"
+                className="bg-transparent border-none outline-none text-sm text-gray-900 dark:text-gray-300 placeholder:text-gray-500 dark:placeholder:text-gray-600 ml-2 w-48"
               />
             </div>
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
 
             {/* Notifications */}
             <div className="relative">
               <button 
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="relative p-2 text-gray-400 hover:text-white transition-colors"
+                className="relative p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 <Bell className="w-5 h-5" />
                 {unreadNotificationsCount > 0 && (
@@ -226,9 +251,9 @@ export default function Layout({ children, currentPageName }) {
               </button>
 
               {notificationsOpen && (
-                <div className="absolute right-0 mt-2 w-96 bg-[#12161D] border border-white/[0.08] rounded-sm shadow-xl max-h-[500px] overflow-hidden flex flex-col">
-                  <div className="flex items-center justify-between p-4 border-b border-white/[0.08]">
-                    <h3 className="text-sm font-medium text-white">Notifications</h3>
+                <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-[#12161D] border border-gray-200 dark:border-white/[0.08] rounded-sm shadow-xl max-h-[500px] overflow-hidden flex flex-col transition-colors">
+                  <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/[0.08]">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">Notifications</h3>
                     {notifications.length > 0 && (
                       <button
                         onClick={markAllAsRead}
@@ -242,7 +267,7 @@ export default function Layout({ children, currentPageName }) {
 
                   <div className="overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500">
+                      <div className="p-8 text-center text-gray-500 dark:text-gray-500">
                         <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">No new notifications</p>
                       </div>
@@ -250,7 +275,7 @@ export default function Layout({ children, currentPageName }) {
                       notifications.map((notification) => (
                         <div
                           key={notification.id}
-                          className="p-4 border-b border-white/[0.08] hover:bg-white/[0.02] transition-colors"
+                          className="p-4 border-b border-gray-200 dark:border-white/[0.08] hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors"
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex-1">
@@ -261,10 +286,10 @@ export default function Layout({ children, currentPageName }) {
                                   notification.type === 'success' ? 'bg-emerald-500' :
                                   'bg-blue-500'
                                 }`} />
-                                <h4 className="text-sm font-medium text-white">{notification.title}</h4>
+                                <h4 className="text-sm font-medium text-gray-900 dark:text-white">{notification.title}</h4>
                               </div>
-                              <p className="text-xs text-gray-400 mb-2">{notification.message}</p>
-                              <p className="text-[10px] text-gray-600">
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{notification.message}</p>
+                              <p className="text-[10px] text-gray-500 dark:text-gray-600">
                                 {new Date(notification.created_date).toLocaleString()}
                               </p>
                             </div>
@@ -283,7 +308,7 @@ export default function Layout({ children, currentPageName }) {
                               )}
                               <button
                                 onClick={() => markNotificationAsRead(notification.id)}
-                                className="p-1 text-gray-500 hover:text-white"
+                                className="p-1 text-gray-500 hover:text-gray-900 dark:hover:text-white"
                               >
                                 <X className="w-3 h-3" />
                               </button>
@@ -301,7 +326,7 @@ export default function Layout({ children, currentPageName }) {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-3 p-2 rounded-sm hover:bg-white/[0.05] transition-colors"
+                className="flex items-center gap-3 p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors"
               >
                 {user?.avatar_url ? (
                   <img 
@@ -317,8 +342,8 @@ export default function Layout({ children, currentPageName }) {
                   </div>
                 )}
                 <div className="hidden md:block text-left">
-                  <p className="text-sm text-white">{user?.display_name || user?.full_name || 'User'}</p>
-                  <p className="text-[10px] font-mono text-gray-500 uppercase">
+                  <p className="text-sm text-gray-900 dark:text-white">{user?.display_name || user?.full_name || 'User'}</p>
+                  <p className="text-[10px] font-mono text-gray-500 dark:text-gray-500 uppercase">
                     {userType}
                   </p>
                 </div>
@@ -326,10 +351,10 @@ export default function Layout({ children, currentPageName }) {
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-[#12161D] border border-white/[0.08] rounded-sm shadow-xl py-1">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#12161D] border border-gray-200 dark:border-white/[0.08] rounded-sm shadow-xl py-1 transition-colors">
                   <Link
                     to={createPageUrl(userType === 'admin' ? 'AdminSettings' : userType === 'partner' ? 'PartnerSettings' : 'ClientSettings')}
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-white/[0.05]"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.05]"
                     onClick={() => setUserMenuOpen(false)}
                   >
                     <Settings className="w-4 h-4" />
@@ -337,7 +362,7 @@ export default function Layout({ children, currentPageName }) {
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-white/[0.05]"
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-white/[0.05]"
                   >
                     <LogOut className="w-4 h-4" />
                     Sign out
@@ -351,8 +376,8 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-16 left-0 bottom-0 w-64 bg-[#0E1116]/80 backdrop-blur-xl border-r border-white/[0.08]
-        transform transition-transform duration-300 ease-in-out z-30
+        fixed top-16 left-0 bottom-0 w-64 bg-white/80 dark:bg-[#0E1116]/80 backdrop-blur-xl border-r border-gray-200 dark:border-white/[0.08]
+        transform transition-all duration-300 ease-in-out z-30
         lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <nav className="p-4 space-y-1">
@@ -366,8 +391,8 @@ export default function Layout({ children, currentPageName }) {
                 className={`
                   flex items-center gap-3 px-4 py-3 rounded-sm transition-all duration-200
                   ${isActive 
-                    ? 'bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-500' 
-                    : 'text-gray-400 hover:text-white hover:bg-white/[0.05]'
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-l-2 border-emerald-500' 
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.05]'
                   }
                 `}
               >
