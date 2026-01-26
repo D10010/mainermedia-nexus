@@ -142,8 +142,8 @@ export default function PlatformCard({
         <div className="p-4 grid grid-cols-2 gap-4">
           {/* Reach */}
           <div>
-            <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Reach</p>
-            <p className="text-lg font-light text-white">{formatNumber(metrics.reach)}</p>
+            <p className="text-[10px] font-mono uppercase text-gray-600 dark:text-gray-500 mb-1">Reach</p>
+            <p className="text-lg font-light text-gray-900 dark:text-white">{formatNumber(metrics.reach)}</p>
             {metrics.reachChange !== undefined && metrics.reachChange !== 0 && (
               <div className="flex items-center gap-1 mt-1">
                 {getTrendIcon(metrics.reachChange)}
@@ -156,8 +156,8 @@ export default function PlatformCard({
 
           {/* Engagement Rate */}
           <div>
-            <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Engagement</p>
-            <p className="text-lg font-light text-white">{metrics.engagementRate?.toFixed(1) || 0}%</p>
+            <p className="text-[10px] font-mono uppercase text-gray-600 dark:text-gray-500 mb-1">Engagement</p>
+            <p className="text-lg font-light text-gray-900 dark:text-white">{metrics.engagementRate?.toFixed(1) || 0}%</p>
             {metrics.engagementChange !== undefined && metrics.engagementChange !== 0 && (
               <div className="flex items-center gap-1 mt-1">
                 {getTrendIcon(metrics.engagementChange)}
@@ -170,12 +170,12 @@ export default function PlatformCard({
 
           {/* Follower Net Change */}
           <div>
-            <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Follower Velocity</p>
-            <p className={`text-lg font-light ${metrics.netFollowerChange > 0 ? 'text-emerald-500' : metrics.netFollowerChange < 0 ? 'text-red-500' : 'text-white'}`}>
+            <p className="text-[10px] font-mono uppercase text-gray-600 dark:text-gray-500 mb-1">Follower Velocity</p>
+            <p className={`text-lg font-light ${metrics.netFollowerChange > 0 ? 'text-emerald-600 dark:text-emerald-500' : metrics.netFollowerChange < 0 ? 'text-red-600 dark:text-red-500' : 'text-gray-900 dark:text-white'}`}>
               {metrics.netFollowerChange > 0 ? '+' : ''}{formatNumber(metrics.netFollowerChange)}
             </p>
             {metrics.followerGrowthRate !== undefined && metrics.followerGrowthRate !== 0 && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-600 dark:text-gray-500 mt-1">
                 {metrics.followerGrowthRate > 0 ? '+' : ''}{metrics.followerGrowthRate?.toFixed(1)}% growth rate
               </p>
             )}
@@ -183,8 +183,8 @@ export default function PlatformCard({
 
           {/* Link Clicks */}
           <div>
-            <p className="text-[10px] font-mono uppercase text-gray-500 mb-1">Link Clicks</p>
-            <p className="text-lg font-light text-white">{formatNumber(metrics.linkClicks)}</p>
+            <p className="text-[10px] font-mono uppercase text-gray-600 dark:text-gray-500 mb-1">Link Clicks</p>
+            <p className="text-lg font-light text-gray-900 dark:text-white">{formatNumber(metrics.linkClicks)}</p>
             {metrics.clicksChange !== undefined && metrics.clicksChange !== 0 && (
               <div className="flex items-center gap-1 mt-1">
                 {getTrendIcon(metrics.clicksChange)}
@@ -197,9 +197,9 @@ export default function PlatformCard({
         </div>
       ) : (
         <div className="p-8 text-center">
-          <AlertCircle className="w-8 h-8 text-gray-600 mx-auto mb-3" />
-          <p className="text-sm text-gray-500 mb-2">No metrics data yet</p>
-          <p className="text-xs text-gray-600 mb-4">
+          <AlertCircle className="w-8 h-8 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
+          <p className="text-sm text-gray-700 dark:text-gray-500 mb-2">No metrics data yet</p>
+          <p className="text-xs text-gray-600 dark:text-gray-600 mb-4">
             Click "Sync Now" to fetch the latest metrics from {platform}
           </p>
           <PrimaryButton
