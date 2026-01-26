@@ -217,8 +217,8 @@ export default function ClientAnalytics() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-light text-white tracking-tight">Social Media Analytics</h1>
-          <p className="text-gray-500 mt-1">Track momentum, attention quality, and business impact across platforms</p>
+          <h1 className="text-3xl font-light text-gray-900 dark:text-white tracking-tight">Social Media Analytics</h1>
+          <p className="text-gray-600 dark:text-gray-500 mt-1">Track momentum, attention quality, and business impact across platforms</p>
         </div>
         <div className="flex items-center gap-3">
           <PrimaryButton 
@@ -344,8 +344,8 @@ export default function ClientAnalytics() {
             <div className="w-16 h-16 rounded-sm bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
               <Target className="w-8 h-8 text-emerald-500" />
             </div>
-            <h3 className="text-white text-lg font-medium mb-2">Connect Your Social Media Accounts</h3>
-            <p className="text-gray-500 mb-6 max-w-md mx-auto">
+            <h3 className="text-gray-900 dark:text-white text-lg font-medium mb-2">Connect Your Social Media Accounts</h3>
+            <p className="text-gray-600 dark:text-gray-500 mb-6 max-w-md mx-auto">
               Start tracking momentum, attention quality, and business impact across all your platforms in one unified dashboard.
             </p>
             <PrimaryButton 
@@ -401,7 +401,7 @@ export default function ClientAnalytics() {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center text-gray-500">
+                <div className="h-full flex items-center justify-center text-gray-600 dark:text-gray-500">
                   No data available for this period
                 </div>
               )}
@@ -455,9 +455,9 @@ export default function ClientAnalytics() {
                     className="w-3 h-3 rounded-sm" 
                     style={{ backgroundColor: entry.color }}
                   />
-                  <span className="text-sm text-gray-400">{entry.name}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{entry.name}</span>
                 </div>
-                <span className="text-sm font-mono text-white">{formatNumber(entry.value)}</span>
+                <span className="text-sm font-mono text-gray-900 dark:text-white">{formatNumber(entry.value)}</span>
               </div>
             ))}
           </div>
