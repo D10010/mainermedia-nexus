@@ -50,6 +50,9 @@
 import LeadList from './pages/LeadList';
 import CreateLead from './pages/CreateLead';
 import LeadDetail from './pages/LeadDetail';
+import MyReferrals from './pages/MyReferrals';
+import SubmitReferral from './pages/SubmitReferral';
+import ReferralDetail from './pages/ReferralDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -57,6 +60,9 @@ export const PAGES = {
     "LeadList": LeadList,
     "CreateLead": CreateLead,
     "LeadDetail": LeadDetail,
+    "MyReferrals": MyReferrals,
+    "SubmitReferral": SubmitReferral,
+    "ReferralDetail": ReferralDetail,
 }
 
 export const pagesConfig = {

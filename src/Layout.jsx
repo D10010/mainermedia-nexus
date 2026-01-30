@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { List, LogOut } from 'lucide-react';
+import { List, LogOut, TrendingUp } from 'lucide-react';
 import { ROLE_LABELS } from '@/components/utils/constants';
 
 export default function Layout({ children }) {
@@ -16,6 +16,9 @@ export default function Layout({ children }) {
     await base44.auth.logout();
   };
 
+  const isSalesAgent = user?.role === 'sales_agent';
+  const isAdminOrInternal = user?.role === 'owner_admin' || user?.role === 'internal_user';
+
   return (
     <div className="min-h-screen bg-[#0a0c10]">
       {/* Header */}
@@ -24,13 +27,23 @@ export default function Layout({ children }) {
           <div className="flex items-center gap-8">
             <h1 className="text-xl font-light text-white tracking-tight">MAINERMEDIA NEXUS</h1>
             <nav className="flex items-center gap-6">
-              <Link
-                to={createPageUrl('LeadList')}
-                className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-              >
-                <List className="w-4 h-4" />
-                Leads
-              </Link>
+              {isSalesAgent ? (
+                <Link
+                  to={createPageUrl('MyReferrals')}
+                  className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  My Referrals
+                </Link>
+              ) : isAdminOrInternal ? (
+                <Link
+                  to={createPageUrl('LeadList')}
+                  className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                >
+                  <List className="w-4 h-4" />
+                  Leads
+                </Link>
+              ) : null}
             </nav>
           </div>
           

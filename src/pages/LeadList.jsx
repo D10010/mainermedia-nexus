@@ -9,6 +9,7 @@ import { LEAD_STATUSES, getStatusColor } from '@/components/utils/constants';
 
 export default function LeadList() {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState('all');
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -37,6 +38,9 @@ export default function LeadList() {
   }).filter(lead => {
     if (statusFilter === 'all') return true;
     return lead.status === statusFilter;
+  }).filter(lead => {
+    if (sourceFilter === 'all') return true;
+    return lead.source === sourceFilter;
   });
 
   const getUserName = (userId) => {
@@ -74,6 +78,17 @@ export default function LeadList() {
             <option key={key} value={key}>{label}</option>
           ))}
         </select>
+        
+        <select
+          value={sourceFilter}
+          onChange={(e) => setSourceFilter(e.target.value)}
+          className="px-3 py-2 bg-[#0E1116] border border-white/[0.08] text-white text-sm rounded outline-none focus:border-green-500"
+        >
+          <option value="all">All Sources</option>
+          <option value="manual">Manual</option>
+          <option value="referral">Referral</option>
+          <option value="inbound">Inbound</option>
+        </select>
       </div>
 
       {/* Lead Table */}
@@ -105,12 +120,19 @@ export default function LeadList() {
                   className="border-b border-white/[0.08] hover:bg-white/[0.02] transition-colors"
                 >
                   <td className="px-6 py-4">
-                    <Link
-                      to={createPageUrl('LeadDetail') + `?id=${lead.id}`}
-                      className="text-white hover:text-green-400 transition-colors"
-                    >
-                      {lead.lead_name}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to={createPageUrl('LeadDetail') + `?id=${lead.id}`}
+                        className="text-white hover:text-green-400 transition-colors"
+                      >
+                        {lead.lead_name}
+                      </Link>
+                      {lead.source === 'referral' && (
+                        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded">
+                          Referral
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-gray-400">{lead.company_name}</td>
                   <td className="px-6 py-4">

@@ -13,7 +13,8 @@ export const LEAD_STATUSES = {
 export const ROLE_LABELS = {
   owner_admin: 'Owner',
   internal_user: 'Admin',
-  external_user: 'External'
+  external_user: 'External',
+  sales_agent: 'Sales Agent'
 };
 
 // Status colors with green emphasis for qualified, meeting_set, proposal_sent, won
