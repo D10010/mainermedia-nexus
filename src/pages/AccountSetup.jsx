@@ -63,6 +63,21 @@ export default function AccountSetup() {
     mutationFn: async () => {
       const currentUser = await base44.auth.me();
       
+      // Check if this is the first user (make them owner admin)
+      const allUsers = await base44.entities.User.list();
+      const isFirstUser = allUsers.length === 0 || allUsers.every(u => !u.user_role);
+      
+      if (isFirstUser) {
+        // First user becomes owner admin automatically
+        await base44.auth.updateMe({
+          display_name: formData.display_name,
+          avatar_url: formData.avatar_url,
+          user_role: 'owner_admin',
+          status: 'Active'
+        });
+        return; // Skip notification process
+      }
+      
       await base44.auth.updateMe({
         display_name: formData.display_name,
         avatar_url: formData.avatar_url,
@@ -116,9 +131,22 @@ export default function AccountSetup() {
         console.error('Failed to notify admins:', e);
       }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries(['currentUser']);
-      navigate(createPageUrl('AwaitingRole'));
+      const user = await base44.auth.me();
+      
+      // If user has a role, redirect to their dashboard
+      if (user.user_role) {
+        const dashboards = {
+          owner_admin: 'OwnerDashboard',
+          client_manager: 'ManagerDashboard',
+          client: 'ClientDashboard',
+          sales_agent: 'AgentDashboard'
+        };
+        navigate(createPageUrl(dashboards[user.user_role]));
+      } else {
+        navigate(createPageUrl('AwaitingRole'));
+      }
     },
   });
 
