@@ -4,7 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { Plus, Filter } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
+import { LEAD_STATUSES, getStatusColor } from '../utils/constants';
 
 export default function LeadList() {
   const [statusFilter, setStatusFilter] = useState('all');
@@ -16,7 +17,7 @@ export default function LeadList() {
 
   const { data: allLeads = [] } = useQuery({
     queryKey: ['allLeads'],
-    queryFn: () => base44.entities.Lead.list('-created_date'),
+    queryFn: () => base44.entities.Lead.list('-updated_date'),
   });
 
   const { data: allUsers = [] } = useQuery({
@@ -40,20 +41,7 @@ export default function LeadList() {
 
   const getUserName = (userId) => {
     const foundUser = allUsers.find(u => u.email === userId);
-    return foundUser?.name || 'Unassigned';
-  };
-
-  const getStatusColor = (status) => {
-    const colors = {
-      new: 'bg-blue-500/20 text-blue-400',
-      contacted: 'bg-purple-500/20 text-purple-400',
-      qualified: 'bg-cyan-500/20 text-cyan-400',
-      meeting_set: 'bg-amber-500/20 text-amber-400',
-      proposal_sent: 'bg-orange-500/20 text-orange-400',
-      won: 'bg-green-500/20 text-green-400',
-      lost: 'bg-red-500/20 text-red-400'
-    };
-    return colors[status] || 'bg-gray-500/20 text-gray-400';
+    return foundUser?.name || null;
   };
 
   return (
@@ -82,13 +70,9 @@ export default function LeadList() {
           className="px-3 py-2 bg-[#0E1116] border border-white/[0.08] text-white text-sm rounded outline-none focus:border-green-500"
         >
           <option value="all">All Status</option>
-          <option value="new">New</option>
-          <option value="contacted">Contacted</option>
-          <option value="qualified">Qualified</option>
-          <option value="meeting_set">Meeting Set</option>
-          <option value="proposal_sent">Proposal Sent</option>
-          <option value="won">Won</option>
-          <option value="lost">Lost</option>
+          {Object.entries(LEAD_STATUSES).map(([key, label]) => (
+            <option key={key} value={key}>{label}</option>
+          ))}
         </select>
       </div>
 
@@ -101,14 +85,17 @@ export default function LeadList() {
               <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Company</th>
               <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Status</th>
               <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Assigned To</th>
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Created</th>
+              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Last Updated</th>
             </tr>
           </thead>
           <tbody>
             {leads.length === 0 ? (
               <tr>
-                <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                  No leads found
+                <td colSpan="5" className="px-6 py-20 text-center">
+                  <div className="space-y-3">
+                    <p className="text-white text-lg">No leads yet</p>
+                    <p className="text-gray-500 text-sm">Add your first lead to start tracking conversations and progress.</p>
+                  </div>
                 </td>
               </tr>
             ) : (
@@ -128,14 +115,18 @@ export default function LeadList() {
                   <td className="px-6 py-4 text-gray-400">{lead.company_name}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 text-xs rounded ${getStatusColor(lead.status)}`}>
-                      {lead.status.replace('_', ' ')}
+                      {LEAD_STATUSES[lead.status]}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-400">
-                    {lead.assigned_internal_user_id ? getUserName(lead.assigned_internal_user_id) : 'Unassigned'}
+                  <td className="px-6 py-4">
+                    {getUserName(lead.assigned_internal_user_id) ? (
+                      <span className="text-gray-400">{getUserName(lead.assigned_internal_user_id)}</span>
+                    ) : (
+                      <span className="text-gray-600">Unassigned</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-gray-400 text-sm">
-                    {format(new Date(lead.created_date), 'MMM d, yyyy')}
+                    {formatDistanceToNow(new Date(lead.updated_date), { addSuffix: true })}
                   </td>
                 </tr>
               ))

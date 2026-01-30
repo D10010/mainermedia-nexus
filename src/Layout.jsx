@@ -4,6 +4,7 @@ import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { List, LogOut } from 'lucide-react';
+import { ROLE_LABELS } from './utils/constants';
 
 export default function Layout({ children }) {
   const { data: user } = useQuery({
@@ -38,7 +39,7 @@ export default function Layout({ children }) {
               <div className="flex items-center gap-3">
                 <div className="text-right">
                   <p className="text-sm text-white">{user.name || user.email}</p>
-                  <p className="text-xs text-gray-500">{user.role?.replace('_', ' ')}</p>
+                  <p className="text-xs text-gray-500">{ROLE_LABELS[user.role] || user.role}</p>
                 </div>
                 <button
                   onClick={handleLogout}

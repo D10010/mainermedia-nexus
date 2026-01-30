@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
-import { ArrowLeft, Send, Lock, Users } from 'lucide-react';
-import { format } from 'date-fns';
+import { ArrowLeft, Send, Lock, Users, AlertCircle } from 'lucide-react';
+import { format, formatDistanceToNow } from 'date-fns';
+import { LEAD_STATUSES, getStatusColor, ROLE_LABELS } from '../utils/constants';
 
 export default function LeadDetail() {
   const queryClient = useQueryClient();
@@ -41,13 +42,10 @@ export default function LeadDetail() {
   const internalUsers = allUsers.filter(u => u.role === 'internal_user' || u.role === 'owner_admin');
 
   // Filter threads based on user permissions
-  const threads = allThreads.filter(thread => {
-    if (!user) return false;
-    
-    if (user.role === 'owner_admin' || user.role === 'internal_user') return true;
-    
-    return thread.visibility === 'shared';
-  });
+  const internalThreads = allThreads.filter(thread => thread.visibility === 'internal');
+  const sharedThreads = allThreads.filter(thread => thread.visibility === 'shared');
+  
+  const canViewInternal = user?.role === 'owner_admin' || user?.role === 'internal_user';
 
   const createThreadMutation = useMutation({
     mutationFn: async () => {
@@ -145,7 +143,12 @@ export default function LeadDetail() {
 
             <div>
               <p className="text-xs text-gray-500 uppercase mb-1">Created</p>
-              <p className="text-white">{format(new Date(lead.created_date), 'MMM d, yyyy')}</p>
+              <p className="text-white">{formatDistanceToNow(new Date(lead.created_date), { addSuffix: true })}</p>
+            </div>
+
+            <div>
+              <p className="text-xs text-gray-500 uppercase mb-1">Last Updated</p>
+              <p className="text-white">{formatDistanceToNow(new Date(lead.updated_date), { addSuffix: true })}</p>
             </div>
           </div>
 
@@ -161,13 +164,9 @@ export default function LeadDetail() {
                   onChange={(e) => updateStatusMutation.mutate(e.target.value)}
                   className="w-full px-3 py-2 bg-[#0a0c10] border border-white/[0.08] text-white text-sm rounded outline-none focus:border-green-500"
                 >
-                  <option value="new">New</option>
-                  <option value="contacted">Contacted</option>
-                  <option value="qualified">Qualified</option>
-                  <option value="meeting_set">Meeting Set</option>
-                  <option value="proposal_sent">Proposal Sent</option>
-                  <option value="won">Won</option>
-                  <option value="lost">Lost</option>
+                  {Object.entries(LEAD_STATUSES).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
                 </select>
               </div>
 
@@ -196,64 +195,108 @@ export default function LeadDetail() {
             </div>
 
             {/* Messages */}
-            <div className="p-6 space-y-4 max-h-[500px] overflow-y-auto">
-              {threads.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No messages yet</p>
+            <div className="p-6 space-y-6 max-h-[500px] overflow-y-auto">
+              {internalThreads.length === 0 && sharedThreads.length === 0 ? (
+                <div className="text-center py-12 space-y-2">
+                  <p className="text-white">No conversation yet</p>
+                  <p className="text-gray-500 text-sm">Add an internal note or shared message to start the thread.</p>
+                </div>
               ) : (
-                threads.map((thread) => (
-                  <div
-                    key={thread.id}
-                    className="bg-[#0a0c10] border border-white/[0.08] rounded p-4"
-                  >
-                    <div className="flex items-center justify-between mb-2">
+                <>
+                  {/* Internal Notes Section */}
+                  {canViewInternal && internalThreads.length > 0 && (
+                    <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm text-white font-medium">{getUserName(thread.author_user_id)}</p>
-                        {thread.visibility === 'internal' && (
-                          <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded">
-                            <Lock className="w-3 h-3" />
-                            Internal
-                          </span>
-                        )}
+                        <Lock className="w-4 h-4 text-amber-400" />
+                        <h3 className="text-sm font-medium text-amber-400 uppercase tracking-wider">Internal Notes</h3>
                       </div>
-                      <p className="text-xs text-gray-500">
-                        {format(new Date(thread.created_date), 'MMM d, h:mm a')}
-                      </p>
+                      {internalThreads.map((thread) => (
+                        <div
+                          key={thread.id}
+                          className="bg-amber-500/5 border border-amber-500/20 rounded p-4"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-sm text-white font-medium">{getUserName(thread.author_user_id)}</p>
+                            <p className="text-xs text-gray-500">
+                              {format(new Date(thread.created_date), 'MMM d, h:mm a')}
+                            </p>
+                          </div>
+                          <p className="text-gray-300 whitespace-pre-wrap">{thread.message_body}</p>
+                        </div>
+                      ))}
                     </div>
-                    <p className="text-gray-300 whitespace-pre-wrap">{thread.message_body}</p>
-                  </div>
-                ))
+                  )}
+
+                  {/* Shared Messages Section */}
+                  {sharedThreads.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-green-400" />
+                        <h3 className="text-sm font-medium text-green-400 uppercase tracking-wider">Shared Messages</h3>
+                      </div>
+                      {sharedThreads.map((thread) => (
+                        <div
+                          key={thread.id}
+                          className="bg-[#0a0c10] border border-white/[0.08] rounded p-4"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-sm text-white font-medium">{getUserName(thread.author_user_id)}</p>
+                            <p className="text-xs text-gray-500">
+                              {format(new Date(thread.created_date), 'MMM d, h:mm a')}
+                            </p>
+                          </div>
+                          <p className="text-gray-300 whitespace-pre-wrap">{thread.message_body}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
             {/* Message Form */}
             <form onSubmit={handleSendMessage} className="p-6 border-t border-white/[0.08] space-y-3">
               {canManageLead && (
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="visibility"
-                      value="shared"
-                      checked={visibility === 'shared'}
-                      onChange={(e) => setVisibility(e.target.value)}
-                      className="text-green-500"
-                    />
-                    <span className="text-sm text-gray-400">Shared</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="visibility"
-                      value="internal"
-                      checked={visibility === 'internal'}
-                      onChange={(e) => setVisibility(e.target.value)}
-                      className="text-green-500"
-                    />
-                    <span className="text-sm text-gray-400 flex items-center gap-1">
-                      <Lock className="w-3 h-3" />
-                      Internal Only
-                    </span>
-                  </label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        value="shared"
+                        checked={visibility === 'shared'}
+                        onChange={(e) => setVisibility(e.target.value)}
+                        className="text-green-500"
+                      />
+                      <span className="text-sm text-gray-400">Shared</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        value="internal"
+                        checked={visibility === 'internal'}
+                        onChange={(e) => setVisibility(e.target.value)}
+                        className="text-green-500"
+                      />
+                      <span className="text-sm text-gray-400 flex items-center gap-1">
+                        <Lock className="w-3 h-3" />
+                        Internal Only
+                      </span>
+                    </label>
+                  </div>
+                  
+                  {visibility === 'internal' ? (
+                    <div className="flex items-start gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2">
+                      <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span>Internal only — not visible to external users</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2 text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded px-3 py-2">
+                      <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span>Visible to external users</span>
+                    </div>
+                  )}
                 </div>
               )}
               
