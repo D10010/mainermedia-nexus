@@ -1,16 +1,51 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '../utils';
 import { Clock, RefreshCw, LogOut } from 'lucide-react';
 import Panel from '@/components/ui/Panel';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import MainerMediaLogo from '@/components/ui/MainerMediaLogo';
 
 export default function AwaitingRole() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ['allUsers'],
+    queryFn: () => base44.entities.User.list(),
+  });
+
+  const promoteToOwnerMutation = useMutation({
+    mutationFn: async () => {
+      await base44.auth.updateMe({
+        user_role: 'owner_admin',
+        status: 'Active'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['currentUser']);
+      navigate(createPageUrl('OwnerDashboard'));
+    },
+  });
+
+  // Auto-promote first user to owner admin
+  useEffect(() => {
+    if (!user || !allUsers) return;
+    
+    const hasOwner = allUsers.some(u => u.user_role === 'owner_admin');
+    
+    // If no owner exists and this user doesn't have a role, make them owner
+    if (!hasOwner && !user.user_role) {
+      promoteToOwnerMutation.mutate();
+    }
+  }, [user, allUsers]);
 
   const handleRefresh = () => {
     window.location.reload();
