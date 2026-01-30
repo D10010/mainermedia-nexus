@@ -23,10 +23,20 @@ export default function AccountSetup() {
     queryFn: () => base44.auth.me(),
   });
 
-  // If user already has a name, redirect them
+  // If user already has a name and role, redirect them
   useEffect(() => {
     if (user && (user.display_name || user.full_name)) {
-      navigate(createPageUrl('AdminDashboard'));
+      if (user.user_role) {
+        const dashboards = {
+          owner_admin: 'OwnerDashboard',
+          client_manager: 'ManagerDashboard',
+          client: 'ClientDashboard',
+          sales_agent: 'AgentDashboard'
+        };
+        navigate(createPageUrl(dashboards[user.user_role] || 'AwaitingRole'));
+      } else {
+        navigate(createPageUrl('AwaitingRole'));
+      }
     }
   }, [user, navigate]);
 
@@ -58,12 +68,12 @@ export default function AccountSetup() {
         avatar_url: formData.avatar_url,
       });
 
-      // Notify admins about new user awaiting role assignment
+      // Notify owner admins about new user awaiting role assignment
       try {
-        const admins = await base44.entities.User.filter({ role: 'admin' });
-        console.log('Found admins:', admins);
+        const owners = await base44.entities.User.filter({ user_role: 'owner_admin' });
+        console.log('Found owner admins:', owners);
         
-        for (const admin of admins) {
+        for (const admin of owners) {
           // Email notification
           try {
             await base44.integrations.Core.SendEmail({
@@ -76,7 +86,7 @@ export default function AccountSetup() {
                 <p><strong>Name:</strong> ${formData.display_name}</p>
                 <p><strong>Email:</strong> ${currentUser.email}</p>
                 <br/>
-                <p>Please log in to the admin portal to assign them a role (Client or Partner).</p>
+                <p>Please log in to assign them a role (Owner Admin, Client Manager, Client, or Sales Agent).</p>
               `
             });
             console.log('Email sent to:', admin.email);
@@ -91,7 +101,7 @@ export default function AccountSetup() {
               title: 'New User Awaiting Role',
               message: `${formData.display_name} (${currentUser.email}) has completed account setup and needs a role assignment.`,
               type: 'alert',
-              link: 'AdminSettings',
+              link: 'OwnerUsers',
               metadata: {
                 user_email: currentUser.email,
                 user_name: formData.display_name

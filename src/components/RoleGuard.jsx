@@ -12,54 +12,27 @@ export default function RoleGuard({ allowedRoles, children }) {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: client } = useQuery({
-    queryKey: ['currentClient', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return null;
-      const clients = await base44.entities.Client.filter({ user_id: user.email });
-      return clients[0] || null;
-    },
-    enabled: !!user?.email && user?.role !== 'admin',
-  });
-
-  const { data: partner } = useQuery({
-    queryKey: ['currentPartner', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return null;
-      const partners = await base44.entities.Partner.filter({ user_id: user.email });
-      return partners[0] || null;
-    },
-    enabled: !!user?.email && user?.role !== 'admin',
-  });
-
   React.useEffect(() => {
     if (isLoading || !user) return;
 
-    let userRole = null;
-    
-    if (user.role === 'admin') {
-      userRole = 'admin';
-    } else if (partner?.status === 'Approved') {
-      userRole = 'partner';
-    } else if (client) {
-      userRole = 'client';
-    }
+    const userRole = user.user_role;
 
     // If user doesn't have an allowed role, redirect to their dashboard
     if (userRole && !allowedRoles.includes(userRole)) {
       const redirectMap = {
-        admin: 'AdminDashboard',
+        owner_admin: 'OwnerDashboard',
+        client_manager: 'ManagerDashboard',
         client: 'ClientDashboard',
-        partner: 'PartnerDashboard'
+        sales_agent: 'AgentDashboard'
       };
       navigate(createPageUrl(redirectMap[userRole]));
     }
-  }, [user, client, partner, isLoading, allowedRoles, navigate]);
+  }, [user, isLoading, allowedRoles, navigate]);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-400">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-[#0a0c10]">
+        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
       </div>
     );
   }

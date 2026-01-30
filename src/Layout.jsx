@@ -55,26 +55,6 @@ export default function Layout({ children, currentPageName }) {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: client } = useQuery({
-    queryKey: ['currentClient', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return null;
-      const clients = await base44.entities.Client.filter({ user_id: user.email });
-      return clients[0] || null;
-    },
-    enabled: !!user?.email && user?.role !== 'admin',
-  });
-
-  const { data: partner } = useQuery({
-    queryKey: ['currentPartner', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return null;
-      const partners = await base44.entities.Partner.filter({ user_id: user.email });
-      return partners[0] || null;
-    },
-    enabled: !!user?.email && user?.role !== 'admin',
-  });
-
   // Redirect logic for onboarding
   React.useEffect(() => {
     if (!user) return;
@@ -88,17 +68,12 @@ export default function Layout({ children, currentPageName }) {
       return;
     }
 
-    // For non-admin users, check if they have a role assigned
-    if (user.role !== 'admin') {
-      // Wait for client/partner queries to complete
-      if (client === undefined || partner === undefined) return;
-      
-      if (!client && !partner) {
-        navigate(createPageUrl('AwaitingRole'));
-        return;
-      }
+    // Check if they have a role assigned
+    if (!user.user_role) {
+      navigate(createPageUrl('AwaitingRole'));
+      return;
     }
-  }, [user, client, partner, currentPageName, navigate]);
+  }, [user, currentPageName, navigate]);
 
   const { data: unreadMessages = [] } = useQuery({
     queryKey: ['unreadMessages', user?.email],
@@ -123,15 +98,26 @@ export default function Layout({ children, currentPageName }) {
   const unreadCount = unreadMessages.reduce((sum, c) => sum + (c.unread_count || 0), 0);
   const unreadNotificationsCount = notifications.length;
 
-  // Determine user type based on role and entity data
-  const getUserType = () => {
-    if (user?.role === 'admin') return 'admin';
-    if (partner?.status === 'Approved') return 'partner';
-    if (client) return 'client';
-    return 'client'; // Default
-  };
+  const userRole = user?.user_role;
 
-  const userType = getUserType();
+  const ownerNav = [
+    { name: 'Dashboard', icon: LayoutDashboard, page: 'OwnerDashboard' },
+    { name: 'Users', icon: Users, page: 'OwnerUsers' },
+    { name: 'Managers', icon: Users, page: 'OwnerManagers' },
+    { name: 'System', icon: Settings, page: 'OwnerSystem' },
+    { name: 'Analytics', icon: BarChart3, page: 'OwnerAnalytics' },
+    { name: 'Notifications', icon: Bell, page: 'Notifications', badge: unreadNotificationsCount },
+  ];
+
+  const managerNav = [
+    { name: 'Dashboard', icon: LayoutDashboard, page: 'ManagerDashboard' },
+    { name: 'My Clients', icon: Users, page: 'ManagerClients' },
+    { name: 'Projects', icon: Folder, page: 'ManagerProjects' },
+    { name: 'Leads', icon: Target, page: 'ManagerLeads' },
+    { name: 'Messages', icon: MessageSquare, page: 'Messages', badge: unreadCount },
+    { name: 'Notifications', icon: Bell, page: 'Notifications', badge: unreadNotificationsCount },
+    { name: 'Settings', icon: Settings, page: 'ManagerSettings' },
+  ];
 
   const clientNav = [
     { name: 'Dashboard', icon: LayoutDashboard, page: 'ClientDashboard' },
@@ -144,33 +130,21 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Settings', icon: Settings, page: 'ClientSettings' },
   ];
 
-  const partnerNav = [
-    { name: 'Dashboard', icon: LayoutDashboard, page: 'PartnerDashboard' },
-    { name: 'Leads', icon: Target, page: 'PartnerLeads' },
-    { name: 'Commissions', icon: DollarSign, page: 'PartnerCommissions' },
-    { name: 'Payouts', icon: Wallet, page: 'PartnerPayouts' },
-    { name: 'Resources', icon: BookOpen, page: 'PartnerResources' },
-    { name: 'Messages', icon: MessageSquare, page: 'Messages', badge: unreadCount },
+  const agentNav = [
+    { name: 'Dashboard', icon: LayoutDashboard, page: 'AgentDashboard' },
+    { name: 'My Leads', icon: Target, page: 'AgentLeads' },
+    { name: 'Commissions', icon: DollarSign, page: 'AgentCommissions' },
+    { name: 'Payouts', icon: Wallet, page: 'AgentPayouts' },
+    { name: 'Resources', icon: BookOpen, page: 'AgentResources' },
     { name: 'Notifications', icon: Bell, page: 'Notifications', badge: unreadNotificationsCount },
-    { name: 'Settings', icon: Settings, page: 'PartnerSettings' },
+    { name: 'Settings', icon: Settings, page: 'AgentSettings' },
   ];
 
-  const adminNav = [
-    { name: 'Dashboard', icon: LayoutDashboard, page: 'AdminDashboard' },
-    { name: 'Clients', icon: Users, page: 'AdminClients' },
-    { name: 'Projects', icon: Folder, page: 'AdminProjects' },
-    { name: 'Packages', icon: Folder, page: 'AdminPackages' },
-    { name: 'Partners', icon: Users, page: 'AdminPartners' },
-    { name: 'Leads', icon: Target, page: 'AdminLeads' },
-    { name: 'Commissions', icon: DollarSign, page: 'AdminCommissions' },
-    { name: 'Payouts', icon: Wallet, page: 'AdminPayouts' },
-    { name: 'Content', icon: FileText, page: 'AdminContent' },
-    { name: 'Analytics', icon: BarChart3, page: 'AdminAnalytics' },
-    { name: 'Notifications', icon: Bell, page: 'Notifications', badge: unreadNotificationsCount },
-    { name: 'Settings', icon: Settings, page: 'AdminSettings' },
-  ];
-
-  const navItems = userType === 'admin' ? adminNav : userType === 'partner' ? partnerNav : clientNav;
+  const navItems = 
+    userRole === 'owner_admin' ? ownerNav :
+    userRole === 'client_manager' ? managerNav :
+    userRole === 'sales_agent' ? agentNav :
+    clientNav;
 
   const handleLogout = async () => {
     await base44.auth.logout();
@@ -344,7 +318,7 @@ export default function Layout({ children, currentPageName }) {
                 <div className="hidden md:block text-left">
                   <p className="text-sm text-gray-900 dark:text-white">{user?.display_name || user?.full_name || 'User'}</p>
                   <p className="text-[10px] font-mono text-gray-500 dark:text-gray-500 uppercase">
-                    {userType}
+                    {userRole?.replace('_', ' ')}
                   </p>
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-500" />
@@ -353,7 +327,12 @@ export default function Layout({ children, currentPageName }) {
               {userMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#12161D] border border-gray-200 dark:border-white/[0.08] rounded-sm shadow-xl py-1 transition-colors">
                   <Link
-                    to={createPageUrl(userType === 'admin' ? 'AdminSettings' : userType === 'partner' ? 'PartnerSettings' : 'ClientSettings')}
+                    to={createPageUrl(
+                      userRole === 'owner_admin' ? 'OwnerSystem' :
+                      userRole === 'client_manager' ? 'ManagerSettings' :
+                      userRole === 'sales_agent' ? 'AgentSettings' :
+                      'ClientSettings'
+                    )}
                     className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/[0.05]"
                     onClick={() => setUserMenuOpen(false)}
                   >
