@@ -58,6 +58,19 @@ export default function AdminDashboard() {
     queryFn: () => base44.entities.ActivityLog.list('-created_date', 10),
   });
 
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ['allUsers'],
+    queryFn: () => base44.entities.User.list(),
+  });
+
+  // Find unassigned users
+  const unassignedUsers = allUsers.filter(user => {
+    if (user.role === 'admin') return false;
+    const hasClient = clients.some(c => c.user_id === user.email);
+    const hasPartner = partners.some(p => p.user_id === user.email);
+    return !hasClient && !hasPartner;
+  });
+
   // Calculate metrics
   const activeClients = clients.filter(c => c.status === 'Active').length;
   
@@ -96,6 +109,7 @@ export default function AdminDashboard() {
   };
 
   const alerts = [
+    ...unassignedUsers.map(u => ({ type: 'unassigned', message: `User needs role: ${u.full_name || u.email}`, id: u.id })),
     ...overdueInvoices.map(i => ({ type: 'overdue', message: `Invoice overdue`, id: i.id })),
     ...newLeads.slice(0, 3).map(l => ({ type: 'lead', message: `New lead: ${l.company_name}`, id: l.id })),
     ...pendingPartners.map(p => ({ type: 'partner', message: `Partner application: ${p.company_name}`, id: p.id })),
@@ -107,10 +121,10 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-light text-white tracking-tight">
+          <h1 className="text-3xl font-light text-gray-900 dark:text-white tracking-tight">
             Admin Dashboard
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-600 dark:text-gray-500 mt-1">
             {format(new Date(), 'EEEE, MMMM d, yyyy')}
           </p>
         </div>
@@ -148,6 +162,50 @@ export default function AdminDashboard() {
         />
       </div>
 
+      {/* Unassigned Users */}
+      {unassignedUsers.length > 0 && (
+        <Panel 
+          title="Users Awaiting Role Assignment" 
+          accent
+          headerAction={
+            <span className="text-[10px] font-mono text-amber-500">
+              {unassignedUsers.length} {unassignedUsers.length === 1 ? 'user' : 'users'}
+            </span>
+          }
+        >
+          <div className="space-y-3">
+            {unassignedUsers.map((user) => (
+              <div 
+                key={user.id}
+                className="flex items-center justify-between p-3 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-sm bg-amber-500/20 flex items-center justify-center">
+                    <span className="text-amber-600 dark:text-amber-500 font-medium">
+                      {(user.full_name || user.email)?.[0]?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-900 dark:text-white">{user.full_name || user.email}</p>
+                    <p className="text-[10px] text-gray-600 dark:text-gray-500">
+                      Joined {format(new Date(user.created_date), 'MMM d, yyyy')}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Link
+                    to={createPageUrl('AdminClients')}
+                    className="px-3 py-1 text-xs bg-emerald-500/20 text-emerald-600 dark:text-emerald-500 rounded-sm hover:bg-emerald-500/30 transition-colors"
+                  >
+                    Assign Role
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Alerts */}
         <Panel 
@@ -166,17 +224,17 @@ export default function AdminDashboard() {
               alerts.map((alert, i) => (
                 <div 
                   key={i}
-                  className="flex items-start gap-3 p-3 bg-[#0E1116] rounded-sm border-l-2 border-amber-500"
+                  className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-[#0E1116] rounded-sm border-l-2 border-amber-500"
                 >
                   <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-sm text-white">{alert.message}</p>
-                    <p className="text-[10px] text-gray-500 mt-0.5">Requires attention</p>
+                    <p className="text-sm text-gray-900 dark:text-white">{alert.message}</p>
+                    <p className="text-[10px] text-gray-600 dark:text-gray-500 mt-0.5">Requires attention</p>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-6 text-gray-500">
+              <div className="text-center py-6 text-gray-600 dark:text-gray-500">
                 <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">All caught up!</p>
               </div>
@@ -197,9 +255,9 @@ export default function AdminDashboard() {
               <div key={stage.label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${stage.color}`} />
-                  <span className="text-sm text-gray-400">{stage.label}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{stage.label}</span>
                 </div>
-                <span className="text-sm font-mono text-white">{stage.count}</span>
+                <span className="text-sm font-mono text-gray-900 dark:text-white">{stage.count}</span>
               </div>
             ))}
           </div>
@@ -224,7 +282,7 @@ export default function AdminDashboard() {
               />
             ))}
             {activityLogs.length === 0 && (
-              <div className="text-center py-4 text-gray-500 text-sm">
+              <div className="text-center py-4 text-gray-600 dark:text-gray-500 text-sm">
                 No recent activity
               </div>
             )}
@@ -249,7 +307,7 @@ export default function AdminDashboard() {
             {clients.slice(0, 5).map((client) => (
               <div 
                 key={client.id}
-                className="flex items-center justify-between p-3 bg-[#0E1116] rounded-sm"
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#0E1116] rounded-sm"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-sm bg-emerald-500/20 flex items-center justify-center">
@@ -258,15 +316,15 @@ export default function AdminDashboard() {
                     </span>
                   </div>
                   <div>
-                    <p className="text-sm text-white">{client.company_name}</p>
-                    <p className="text-[10px] text-gray-500">{client.industry}</p>
+                    <p className="text-sm text-gray-900 dark:text-white">{client.company_name}</p>
+                    <p className="text-[10px] text-gray-600 dark:text-gray-500">{client.industry}</p>
                   </div>
                 </div>
                 <StatusBadge status={client.status} size="small" />
               </div>
             ))}
             {clients.length === 0 && (
-              <div className="text-center py-4 text-gray-500 text-sm">
+              <div className="text-center py-4 text-gray-600 dark:text-gray-500 text-sm">
                 No clients yet
               </div>
             )}
@@ -289,17 +347,17 @@ export default function AdminDashboard() {
             {projects.filter(p => p.status === 'In Progress').slice(0, 5).map((project) => (
               <div 
                 key={project.id}
-                className="p-3 bg-[#0E1116] rounded-sm"
+                className="p-3 bg-gray-50 dark:bg-[#0E1116] rounded-sm"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <p className="text-sm text-white">{project.name}</p>
-                    <p className="text-[10px] text-gray-500 mt-0.5">{project.description?.slice(0, 40)}...</p>
+                    <p className="text-sm text-gray-900 dark:text-white">{project.name}</p>
+                    <p className="text-[10px] text-gray-600 dark:text-gray-500 mt-0.5">{project.description?.slice(0, 40)}...</p>
                   </div>
                   <StatusBadge status={project.status} size="small" />
                 </div>
                 <div className="flex items-center justify-between mt-3">
-                  <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                  <div className="flex items-center gap-1 text-[10px] text-gray-600 dark:text-gray-500">
                     <Clock className="w-3 h-3" />
                     {project.end_date && format(new Date(project.end_date), 'MMM d')}
                   </div>
@@ -313,7 +371,7 @@ export default function AdminDashboard() {
               </div>
             ))}
             {projects.filter(p => p.status === 'In Progress').length === 0 && (
-              <div className="text-center py-4 text-gray-500 text-sm">
+              <div className="text-center py-4 text-gray-600 dark:text-gray-500 text-sm">
                 No active projects
               </div>
             )}
@@ -337,11 +395,11 @@ export default function AdminDashboard() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/[0.08]">
-                <th className="px-4 py-3 text-left text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">Partner</th>
-                <th className="px-4 py-3 text-left text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">Status</th>
-                <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">Leads</th>
-                <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">Conversions</th>
-                <th className="px-4 py-3 text-right text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">Total Earnings</th>
+                <th className="px-4 py-3 text-left text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 dark:text-gray-500">Partner</th>
+                <th className="px-4 py-3 text-left text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 dark:text-gray-500">Status</th>
+                <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 dark:text-gray-500">Leads</th>
+                <th className="px-4 py-3 text-center text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 dark:text-gray-500">Conversions</th>
+                <th className="px-4 py-3 text-right text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 dark:text-gray-500">Total Earnings</th>
               </tr>
             </thead>
             <tbody>
@@ -351,14 +409,14 @@ export default function AdminDashboard() {
                 return (
                   <tr key={partner.id} className="border-b border-white/[0.05]">
                     <td className="px-4 py-4">
-                      <p className="text-sm text-white">{partner.company_name}</p>
+                      <p className="text-sm text-gray-900 dark:text-white">{partner.company_name}</p>
                     </td>
                     <td className="px-4 py-4">
                       <StatusBadge status={partner.status} size="small" />
                     </td>
-                    <td className="px-4 py-4 text-center text-sm text-gray-400">{partnerLeads.length}</td>
-                    <td className="px-4 py-4 text-center text-sm text-gray-400">{wonLeads.length}</td>
-                    <td className="px-4 py-4 text-right text-sm font-mono text-emerald-400">
+                    <td className="px-4 py-4 text-center text-sm text-gray-700 dark:text-gray-400">{partnerLeads.length}</td>
+                    <td className="px-4 py-4 text-center text-sm text-gray-700 dark:text-gray-400">{wonLeads.length}</td>
+                    <td className="px-4 py-4 text-right text-sm font-mono text-emerald-600 dark:text-emerald-400">
                       {formatCurrency(partner.total_earnings || 0)}
                     </td>
                   </tr>
@@ -366,7 +424,7 @@ export default function AdminDashboard() {
               })}
               {partners.filter(p => p.status === 'Approved').length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-4 py-8 text-center text-gray-600 dark:text-gray-500">
                     No approved partners yet
                   </td>
                 </tr>
