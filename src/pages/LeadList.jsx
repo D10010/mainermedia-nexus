@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { Plus, Filter } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
-import { LEAD_STATUSES, getStatusColor } from '../utils/constants';
+import { LEAD_STATUSES, getStatusColor } from '../components/utils/constants';
 
 export default function LeadList() {
   const [statusFilter, setStatusFilter] = useState('all');

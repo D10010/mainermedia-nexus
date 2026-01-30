@@ -4,7 +4,7 @@ import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { List, LogOut } from 'lucide-react';
-import { ROLE_LABELS } from './utils/constants';
+import { ROLE_LABELS } from './components/utils/constants';
 
 export default function Layout({ children }) {
   const { data: user } = useQuery({
