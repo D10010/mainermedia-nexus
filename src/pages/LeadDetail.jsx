@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { ArrowLeft, Send, Lock, Users, AlertCircle } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
-import { LEAD_STATUSES, getStatusColor, ROLE_LABELS } from '../components/utils/constants';
+import { LEAD_STATUSES, getStatusColor, ROLE_LABELS } from '@/components/utils/constants';
 
 export default function LeadDetail() {
   const queryClient = useQueryClient();
