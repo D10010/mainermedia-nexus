@@ -76,6 +76,8 @@ import PartnerLeads from './pages/PartnerLeads';
 import PartnerPayouts from './pages/PartnerPayouts';
 import PartnerResources from './pages/PartnerResources';
 import PartnerSettings from './pages/PartnerSettings';
+import OwnerDashboard from './pages/OwnerDashboard';
+import OwnerUsers from './pages/OwnerUsers';
 import __Layout from './Layout.jsx';
 
 
@@ -109,6 +111,8 @@ export const PAGES = {
     "PartnerPayouts": PartnerPayouts,
     "PartnerResources": PartnerResources,
     "PartnerSettings": PartnerSettings,
+    "OwnerDashboard": OwnerDashboard,
+    "OwnerUsers": OwnerUsers,
 }
 
 export const pagesConfig = {
