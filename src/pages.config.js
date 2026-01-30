@@ -47,13 +47,20 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import LeadList from './pages/LeadList';
+import CreateLead from './pages/CreateLead';
+import LeadDetail from './pages/LeadDetail';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "LeadList": LeadList,
+    "CreateLead": CreateLead,
+    "LeadDetail": LeadDetail,
 }
 
 export const pagesConfig = {
+    mainPage: "LeadList",
     Pages: PAGES,
     Layout: __Layout,
 };
